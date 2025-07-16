@@ -33,7 +33,7 @@ if [ ! -d "${TOMCAT_HOME}" ]; then
     sudo tar -xzf /tmp/tomcat_install/tomcat.tar.gz -C /opt/
     echo "Tomcat extracted. Listing /opt/ contents:"
     ls -la /opt/
-    echo "Moving extracted Tomcat to ${TOMCAT_HOME}...
+    echo "Moving extracted Tomcat to ${TOMCAT_HOME}..."
     sudo mv /opt/apache-tomcat-${TOMCAT_VERSION} ${TOMCAT_HOME}
     echo "Tomcat moved. Listing /opt/ contents after move:"
     ls -la /opt/
@@ -48,7 +48,7 @@ if [ ! -d "${TOMCAT_HOME}" ]; then
 
     # Systemd 서비스 파일 생성
     echo "Creating Tomcat systemd service file..."
-    sudo bash -c "cat > /etc/systemd/system/tomcat.service <<EOF
+    sudo tee /etc/systemd/system/tomcat.service > /dev/null <<EOF
 [Unit]
 Description=Apache Tomcat Web Application Container
 After=network.target
@@ -56,10 +56,10 @@ After=network.target
 [Service]
 Type=forking
 
-Environment=\"JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64\"
-Environment=\"CATALINA_PID=${TOMCAT_HOME}/temp/tomcat.pid\"
-Environment=\"CATALINA_HOME=${TOMCAT_HOME}\"
-Environment=\"CATALINA_BASE=${TOMCAT_HOME}\"
+Environment="JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64"
+Environment="CATALINA_PID=${TOMCAT_HOME}/temp/tomcat.pid"
+Environment="CATALINA_HOME=${TOMCAT_HOME}"
+Environment="CATALINA_BASE=${TOMCAT_HOME}"
 ExecStart=${TOMCAT_HOME}/bin/startup.sh
 ExecStop=${TOMCAT_HOME}/bin/shutdown.sh
 
@@ -71,7 +71,7 @@ Restart=always
 
 [Install]
 WantedBy=multi-user.target
-EOF"
+EOF
 
     # Systemd 데몬 리로드 및 톰캣 서비스 활성화
     echo "Enabling Tomcat service..."
