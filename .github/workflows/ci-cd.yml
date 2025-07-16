@@ -38,7 +38,7 @@ jobs:
       
     # 4. Gradle 캐시 설정 (빌드 속도 향상)
     - name: Gradle 캐시 설정
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ~/.gradle/caches
@@ -65,7 +65,7 @@ jobs:
       
     # 9. 빌드된 WAR 파일을 아티팩트로 업로드
     - name: 빌드 결과물 업로드
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: war-file
         path: build/libs/*.war
@@ -81,7 +81,7 @@ jobs:
     steps:
     # 1. 빌드된 아티팩트 다운로드
     - name: 빌드 결과물 다운로드
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: war-file
         path: ./artifacts
