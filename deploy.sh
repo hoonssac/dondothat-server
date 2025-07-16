@@ -9,7 +9,6 @@ TOMCAT_VERSION="9.0.89" # 사용할 톰캣 버전
 TOMCAT_URL="https://archive.apache.org/dist/tomcat/tomcat-9/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
 
 TOMCAT_HOME="/opt/tomcat"
-WAR_FILE="/home/${EC2_USERNAME}/dondothat.war"
 WEBAPPS_PATH="${TOMCAT_HOME}/webapps"
 
 echo "Starting deploy.sh script..."
@@ -92,7 +91,15 @@ sudo rm -f "${WEBAPPS_PATH}/dondothat.war"
 
 # 새로운 WAR 파일 복사
 echo "Copying new WAR file..."
-sudo mv "${WAR_FILE}" "${WEBAPPS_PATH}/"
+# /home/${EC2_USERNAME}/ 경로에서 *.war 파일을 찾아 이동
+UPLOADED_WAR=$(find /home/${EC2_USERNAME}/ -maxdepth 1 -name "*.war" -print -quit)
+
+if [ -z "$UPLOADED_WAR" ]; then
+    echo "Error: No WAR file found in /home/${EC2_USERNAME}/"
+    exit 1
+fi
+
+sudo mv "${UPLOADED_WAR}" "${WEBAPPS_PATH}/"
 
 # 톰캣 시작
 echo "Starting Tomcat..."
