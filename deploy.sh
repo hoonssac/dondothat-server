@@ -56,10 +56,10 @@ After=network.target
 [Service]
 Type=forking
 
-Environment="JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64"
-Environment="CATALINA_PID=${TOMCAT_HOME}/temp/tomcat.pid"
-Environment="CATALINA_HOME=${TOMCAT_HOME}"
-Environment="CATALINA_BASE=${TOMCAT_HOME}"
+Environment=\"JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64\"
+Environment=\"CATALINA_PID=${TOMCAT_HOME}/temp/tomcat.pid\"
+Environment=\"CATALINA_HOME=${TOMCAT_HOME}\"
+Environment=\"CATALINA_BASE=${TOMCAT_HOME}\"
 ExecStart=${TOMCAT_HOME}/bin/startup.sh
 ExecStop=${TOMCAT_HOME}/bin/shutdown.sh
 
