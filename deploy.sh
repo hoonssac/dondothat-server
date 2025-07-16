@@ -92,11 +92,11 @@ sudo rm -f "${WEBAPPS_PATH}/dondothat.war"
 # 새로운 WAR 파일 복사
 echo "Copying new WAR file..."
 
-# /home/${EC2_USERNAME}/ 경로에서 *.war 파일을 찾아 이동
-UPLOADED_WAR=$(find /home/${EC2_USERNAME}/ -maxdepth 1 -name "*.war" -print -quit)
+# /home/${EC2_USERNAME}/build/libs/ 경로에서 *.war 파일을 찾아 이동
+UPLOADED_WAR=$(find /home/${EC2_USERNAME}/build/libs/ -maxdepth 1 -name "*.war" -print -quit)
 
 if [ -z "$UPLOADED_WAR" ]; then
-    echo "Error: No WAR file found in /home/${EC2_USERNAME}/"
+    echo "Error: No WAR file found in /home/${EC2_USERNAME}/build/libs/"
     exit 1
 fi
 
