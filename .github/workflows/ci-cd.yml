@@ -141,13 +141,22 @@ jobs:
       - name: Verify deploy.sh exists on runner
         run: ls -la deploy.sh
 
-      - name: Upload WAR and deploy.sh to EC2
+      - name: Upload WAR to EC2
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "build/libs/DonDoThat-1.0-SNAPSHOT.war,deploy.sh"
+          source: "build/libs/DonDoThat-1.0-SNAPSHOT.war"
+          target: "/home/${{ secrets.EC2_USERNAME }}/"
+
+      - name: Upload deploy.sh to EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "deploy.sh"
           target: "/home/${{ secrets.EC2_USERNAME }}/"
 
       - name: Run deploy script on EC2
