@@ -1,0 +1,104 @@
+name: CI/CD Pipeline
+
+# 워크플로우가 실행될 조건들
+on:
+  # main 브랜치에 push할 때
+  push:
+    branches: [ main, master ]
+  # Pull Request가 main 브랜치로 요청될 때
+  pull_request:
+    branches: [ main, master ]
+
+# 환경 변수 설정
+env:
+  JAVA_VERSION: '17'
+  GRADLE_VERSION: 'wrapper'
+
+jobs:
+  # CI 작업: 코드 검증 및 테스트
+  test:
+    runs-on: ubuntu-latest
+    name: 테스트 및 빌드 검증
+    
+    steps:
+    # 1. 소스코드 체크아웃
+    - name: 코드 체크아웃
+      uses: actions/checkout@v4
+      
+    # 2. JDK 17 설정
+    - name: JDK 17 설정
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+        
+    # 3. Gradle 실행 권한 부여
+    - name: Gradle 실행 권한 부여
+      run: chmod +x ./gradlew
+      
+    # 4. Gradle 캐시 설정 (빌드 속도 향상)
+    - name: Gradle 캐시 설정
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+          
+    # 5. 의존성 다운로드
+    - name: 의존성 다운로드
+      run: ./gradlew dependencies
+      
+    # 6. 코드 컴파일
+    - name: 코드 컴파일
+      run: ./gradlew compileJava
+      
+    # 7. 테스트 실행
+    - name: 테스트 실행
+      run: ./gradlew test
+      
+    # 8. WAR 파일 빌드
+    - name: WAR 파일 빌드
+      run: ./gradlew clean build
+      
+    # 9. 빌드된 WAR 파일을 아티팩트로 업로드
+    - name: 빌드 결과물 업로드
+      uses: actions/upload-artifact@v3
+      with:
+        name: war-file
+        path: build/libs/*.war
+        retention-days: 30
+
+  # CD 작업: 배포 (테스트가 성공했을 때만 실행)
+  deploy:
+    runs-on: ubuntu-latest
+    name: 배포
+    needs: test  # test 작업이 성공해야 실행됨
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'  # main/master 브랜치에만 배포
+    
+    steps:
+    # 1. 빌드된 아티팩트 다운로드
+    - name: 빌드 결과물 다운로드
+      uses: actions/download-artifact@v3
+      with:
+        name: war-file
+        path: ./artifacts
+        
+    # 2. 배포 시뮬레이션 (실제 서버 배포로 대체 가능)
+    - name: 배포 시뮬레이션
+      run: |
+        echo "🚀 배포를 시작합니다..."
+        echo "📦 WAR 파일 확인:"
+        ls -la ./artifacts/
+        echo "✅ 배포가 완료되었습니다!"
+        
+    # 3. Slack 알림 (선택사항)
+    # - name: Slack 알림
+    #   if: always()
+    #   uses: 8398a7/action-slack@v3
+    #   with:
+    #     status: ${{ job.status }}
+    #     channel: '#deployment'
+    #     webhook_url: ${{ secrets.SLACK_WEBHOOK }}
