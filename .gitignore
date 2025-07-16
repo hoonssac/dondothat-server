@@ -74,3 +74,6 @@ logs/
 # Temporary files
 tmp/
 temp/
+
+# Ignore application properties to protect sensitive data
+src/main/resources/application.properties
