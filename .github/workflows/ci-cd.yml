@@ -141,6 +141,9 @@ jobs:
       - name: Verify deploy.sh exists on runner
         run: ls -la deploy.sh
 
+      - name: Verify WAR file on runner before SCP
+        run: ls -la build/libs/DonDoThat-1.0-SNAPSHOT.war
+
       - name: Upload WAR to EC2
         uses: appleboy/scp-action@master
         with:
@@ -149,6 +152,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "build/libs/DonDoThat-1.0-SNAPSHOT.war"
           target: "/home/${{ secrets.EC2_USERNAME }}/"
+          debug: true
 
       - name: Verify WAR file on EC2 after SCP
         uses: appleboy/ssh-action@master
