@@ -150,20 +150,9 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "build/libs/DonDoThat-1.0-SNAPSHOT.war"
+          source: "build/libs/"
           target: "/home/${{ secrets.EC2_USERNAME }}/"
           debug: true
-
-      - name: Verify WAR file on EC2 after SCP
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            echo "Verifying WAR file presence on EC2:"
-            ls -la /home/${{ secrets.EC2_USERNAME }}/DonDoThat-1.0-SNAPSHOT.war
-            ls -la /home/${{ secrets.EC2_USERNAME }}/
 
       - name: Upload deploy.sh to EC2
         uses: appleboy/scp-action@master
