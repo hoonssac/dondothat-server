@@ -136,6 +136,9 @@ jobs:
           name: war-artifact
           path: build/libs/
 
+      - name: Verify deploy.sh exists on runner
+        run: ls -la deploy.sh
+
       - name: Upload WAR and deploy.sh to EC2
         uses: appleboy/scp-action@master
         with:
@@ -158,5 +161,6 @@ jobs:
             export DB_NAME=${{ secrets.DB_NAME }}
             export SPRING_PROFILES_ACTIVE=prod
             
+            ls -la /home/${{ secrets.EC2_USERNAME }}/
             chmod +x /home/${{ secrets.EC2_USERNAME }}/deploy.sh
             sudo /home/${{ secrets.EC2_USERNAME }}/deploy.sh
