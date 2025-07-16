@@ -175,8 +175,6 @@ jobs:
             export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             export DB_NAME=${{ secrets.DB_NAME }}
             export SPRING_PROFILES_ACTIVE=prod
-            export EC2_USERNAME=${{ secrets.EC2_USERNAME }}
             
-            ls -la /home/${{ secrets.EC2_USERNAME }}/
             chmod +x /home/${{ secrets.EC2_USERNAME }}/deploy.sh
             sudo /home/${{ secrets.EC2_USERNAME }}/deploy.sh

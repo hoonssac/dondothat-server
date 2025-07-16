@@ -11,6 +11,9 @@ TOMCAT_URL="https://archive.apache.org/dist/tomcat/tomcat-9/v${TOMCAT_VERSION}/b
 TOMCAT_HOME="/opt/tomcat"
 WEBAPPS_PATH="${TOMCAT_HOME}/webapps"
 
+# EC2 사용자 이름을 여기에 직접 입력하세요. (예: ec2-user, ubuntu)
+EC2_USERNAME_HARDCODED="ec2-user"
+
 echo "Starting deploy.sh script..."
 
 # 톰캣 설치 확인 및 설치
@@ -30,7 +33,7 @@ if [ ! -d "${TOMCAT_HOME}" ]; then
     sudo tar -xzf /tmp/tomcat_install/tomcat.tar.gz -C /opt/
     echo "Tomcat extracted. Listing /opt/ contents:"
     ls -la /opt/
-    echo "Moving extracted Tomcat to ${TOMCAT_HOME}..."
+    echo "Moving extracted Tomcat to ${TOMCAT_HOME}...
     sudo mv /opt/apache-tomcat-${TOMCAT_VERSION} ${TOMCAT_HOME}
     echo "Tomcat moved. Listing /opt/ contents after move:"
     ls -la /opt/
@@ -92,11 +95,11 @@ sudo rm -f "${WEBAPPS_PATH}/dondothat.war"
 # 새로운 WAR 파일 복사
 echo "Copying new WAR file..."
 
-# /home/${EC2_USERNAME}/build/libs/ 경로에서 *.war 파일을 찾아 이동
-UPLOADED_WAR=$(find /home/${EC2_USERNAME}/build/libs/ -maxdepth 1 -name "*.war" -print -quit)
+# /home/${EC2_USERNAME_HARDCODED}/build/libs/ 경로에서 *.war 파일을 찾아 이동
+UPLOADED_WAR=$(find /home/${EC2_USERNAME_HARDCODED}/build/libs/ -maxdepth 1 -name "*.war" -print -quit)
 
 if [ -z "$UPLOADED_WAR" ]; then
-    echo "Error: No WAR file found in /home/${EC2_USERNAME}/build/libs/"
+    echo "Error: No WAR file found in /home/${EC2_USERNAME_HARDCODED}/build/libs/"
     exit 1
 fi
 
