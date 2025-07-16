@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e # 어떤 명령이든 실패하면 즉시 스크립트 종료
 
 # 환경 변수 설정 (GitHub Actions에서 주입)
 # TOMCAT_HOME: 톰캣 설치 경로 (예: /opt/tomcat)
@@ -11,24 +12,37 @@ TOMCAT_HOME="/opt/tomcat"
 WAR_FILE="/home/${EC2_USERNAME}/dondothat.war"
 WEBAPPS_PATH="${TOMCAT_HOME}/webapps"
 
+echo "Starting deploy.sh script..."
+
 # 톰캣 설치 확인 및 설치
 if [ ! -d "${TOMCAT_HOME}" ]; then
-    echo "Tomcat not found at ${TOMCAT_HOME}. Installing Tomcat..."
+    echo "Tomcat not found at ${TOMCAT_HOME}. Proceeding with installation..."
 
     # 톰캣 사용자 및 그룹 생성
-    sudo groupadd tomcat
-    sudo useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat
+    echo "Creating tomcat user and group..."
+    sudo groupadd tomcat || true # 이미 존재하면 오류 무시
+    sudo useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat || true # 이미 존재하면 오류 무시
 
     # 톰캣 다운로드 및 압축 해제
+    echo "Downloading Tomcat from ${TOMCAT_URL}..."
     mkdir -p /tmp/tomcat_install
     wget -q ${TOMCAT_URL} -O /tmp/tomcat_install/tomcat.tar.gz
+    echo "Tomcat downloaded. Extracting to /opt/..."
     sudo tar -xzf /tmp/tomcat_install/tomcat.tar.gz -C /opt/
+    echo "Tomcat extracted. Listing /opt/ contents:"
+    ls -la /opt/
+    echo "Moving extracted Tomcat to ${TOMCAT_HOME}..."
     sudo mv /opt/apache-tomcat-${TOMCAT_VERSION} ${TOMCAT_HOME}
+    echo "Tomcat moved. Listing /opt/ contents after move:"
+    ls -la /opt/
     rm -rf /tmp/tomcat_install
 
     # 권한 설정
+    echo "Setting Tomcat directory permissions..."
     sudo chown -RH tomcat:tomcat ${TOMCAT_HOME}
     sudo sh -c 'chmod +x ${TOMCAT_HOME}/bin/*.sh'
+    echo "Permissions set. Listing ${TOMCAT_HOME}/bin/ contents:"
+    sudo ls -la ${TOMCAT_HOME}/bin/
 
     # Systemd 서비스 파일 생성
     echo "Creating Tomcat systemd service file..."
