@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 # 워크플로우가 실행될 조건들
 on:
-  # main 브랜치에 push할 때
+  # 모든 브랜치에 push할 때
   push:
-    branches: [ main, master ]
+    branches: [ main, master, feat/* ]
   # Pull Request가 main 브랜치로 요청될 때
   pull_request:
     branches: [ main, master ]
