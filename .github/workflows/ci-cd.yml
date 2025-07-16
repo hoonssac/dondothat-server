@@ -50,23 +50,15 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
           
-    # 5. 의존성 다운로드
-    - name: 의존성 다운로드
-      run: ./gradlew dependencies
-      
-    # 6. 코드 컴파일
-    - name: 코드 컴파일
-      run: ./gradlew compileJava
-      
-    # 7. 테스트 실행
+    # 5. 테스트 실행 및 빌드
     - name: 테스트 실행
       run: ./gradlew test
       
-    # 8. WAR 파일 빌드
+    # 6. WAR 파일 빌드
     - name: WAR 파일 빌드
-      run: ./gradlew clean build
+      run: ./gradlew clean build -x test
       
-    # 9. 빌드된 WAR 파일을 아티팩트로 업로드
+    # 7. 빌드된 WAR 파일을 아티팩트로 업로드
     - name: 빌드 결과물 업로드
       uses: actions/upload-artifact@v4
       with:
