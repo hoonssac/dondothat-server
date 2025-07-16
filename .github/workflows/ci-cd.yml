@@ -67,8 +67,16 @@ jobs:
           mysql -h127.0.0.1 -uroot -proot -e "CREATE DATABASE IF NOT EXISTS dondothat CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
           mysql -h127.0.0.1 -uroot -proot -e "SHOW DATABASES;"
 
+      - name: Debugging before tests
+        run: |
+          pwd
+          ls -la
+
       - name: Run tests
-        run: ./gradlew test
+        run: |
+          set -x
+          ./gradlew --version
+          ./gradlew test
         env:
           SPRING_PROFILES_ACTIVE: test
 
