@@ -76,8 +76,8 @@ jobs:
         run: |
           set -x
           ./gradlew --version
-          ./gradlew tasks
-          ./gradlew test
+                    bash ./gradlew tasks
+          bash ./gradlew test
         env:
           SPRING_PROFILES_ACTIVE: test
 
