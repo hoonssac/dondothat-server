@@ -136,7 +136,16 @@ jobs:
           name: war-artifact
           path: build/libs/
 
-      - name: Deploy to EC2
+      - name: Upload WAR to EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "build/libs/*.war"
+          target: "/home/${{ secrets.EC2_USERNAME }}/"
+
+      - name: Run deploy script on EC2
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -148,7 +157,5 @@ jobs:
             export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             export DB_NAME=${{ secrets.DB_NAME }}
             export SPRING_PROFILES_ACTIVE=prod
-            
-            sudo scp -i ${{ secrets.EC2_SSH_KEY }} build/libs/dondothat.war ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USERNAME }}/
             
             sudo /home/${{ secrets.EC2_USERNAME }}/deploy.sh
