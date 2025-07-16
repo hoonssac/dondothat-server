@@ -92,8 +92,17 @@ echo "Removing old application..."
 sudo rm -rf "${WEBAPPS_PATH}/dondothat"
 sudo rm -f "${WEBAPPS_PATH}/dondothat.war"
 
-# 새로운 WAR 파일 복사
-echo "Copying new WAR file..."
+# webapps 디렉토리 확인 및 생성
+if [ ! -d "${WEBAPPS_PATH}" ]; then
+    echo "Creating webapps directory at ${WEBAPPS_PATH}..."
+    sudo mkdir -p "${WEBAPPS_PATH}"
+    sudo chown tomcat:tomcat "${WEBAPPS_PATH}"
+fi
+
+# 디렉토리 상태 확인
+echo "Checking webapps directory:"
+ls -la "${TOMCAT_HOME}/"
+ls -la "${WEBAPPS_PATH}" || echo "webapps directory not accessible"
 
 # /home/${EC2_USERNAME_HARDCODED}/build/libs/ 경로에서 *.war 파일을 찾아 이동
 UPLOADED_WAR=$(find /home/${EC2_USERNAME_HARDCODED}/build/libs/ -maxdepth 1 -name "*.war" -print -quit)
@@ -103,6 +112,8 @@ if [ -z "$UPLOADED_WAR" ]; then
     exit 1
 fi
 
+echo "Found WAR file: ${UPLOADED_WAR}"
+echo "Moving to: ${WEBAPPS_PATH}/"
 sudo mv "${UPLOADED_WAR}" "${WEBAPPS_PATH}/"
 
 # 톰캣 시작
