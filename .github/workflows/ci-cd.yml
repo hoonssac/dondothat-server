@@ -76,8 +76,8 @@ jobs:
         run: |
           set -x
           ./gradlew --version
-                    sh -c "./gradlew tasks"
-          sh -c "./gradlew test"
+                    java -classpath gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain tasks
+          java -classpath gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain test
         env:
           SPRING_PROFILES_ACTIVE: test
 
