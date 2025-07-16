@@ -136,13 +136,13 @@ jobs:
           name: war-artifact
           path: build/libs/
 
-      - name: Upload WAR to EC2
+      - name: Upload WAR and deploy.sh to EC2
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "build/libs/*.war"
+          source: "build/libs/*.war,deploy.sh"
           target: "/home/${{ secrets.EC2_USERNAME }}/"
 
       - name: Run deploy script on EC2
@@ -158,4 +158,5 @@ jobs:
             export DB_NAME=${{ secrets.DB_NAME }}
             export SPRING_PROFILES_ACTIVE=prod
             
+            chmod +x /home/${{ secrets.EC2_USERNAME }}/deploy.sh
             sudo /home/${{ secrets.EC2_USERNAME }}/deploy.sh
