@@ -6,6 +6,6 @@
     <title>Title</title>
 </head>
 <body>
-<h1>환영합니다.</h1>
+<h1>돈두댓 백엔드 서버입니다.</h1>
 </body>
 </html>
