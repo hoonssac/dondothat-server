@@ -134,7 +134,7 @@ fi
 
 echo "Found WAR file: ${UPLOADED_WAR}"
 echo "Moving to: ${WEBAPPS_PATH}/"
-sudo cp "${UPLOADED_WAR}" "${WEBAPPS_PATH}/"
+sudo cp "${UPLOADED_WAR}" "${WEBAPPS_PATH}/ROOT.war"
 sudo chown tomcat:tomcat "${WEBAPPS_PATH}"/*.war
 
 # 톰캣 시작 전 디렉토리 구조 최종 확인
