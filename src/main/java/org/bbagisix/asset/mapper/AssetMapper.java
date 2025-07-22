@@ -6,7 +6,12 @@ import org.bbagisix.asset.domain.AssetVO;
 
 public interface AssetMapper {
 	void insert(AssetVO asset);
-	List<AssetVO> findByUserId(Long userId);
+
+	void update(AssetVO asset);
+
+	AssetVO findByUserId(Long userId);
+
 	AssetVO findById(Long assetId);
-	int delete(Long assetId);
+
+	int deleteByUserId(Long userId);
 }
