@@ -2,6 +2,7 @@ package org.bbagisix.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -12,7 +13,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
 
 @EnableWebMvc // FrontController (DispatcherServlet)
-@ComponentScan(basePackages = {"org.bbagisix.controller"}) // Spring MVC용 컴포넌트 등록을 위한 스캔 패키지
+@ComponentScan(basePackages = {"org.bbagisix"}) // Spring MVC용 컴포넌트 등록을 위한 스캔 패키지
 public class ServletConfig implements WebMvcConfigurer {
 
 	@Override
@@ -20,7 +21,7 @@ public class ServletConfig implements WebMvcConfigurer {
 		registry
 			.addResourceHandler("/resources/**") // url이 /resources/로 시작하는 모든 경로 (정작 파일 등록)
 			.addResourceLocations("/resources/"); // webapp/resources/ 경로로 매핑
-		
+
 	}
 
 	// jsp view resolver 설정
