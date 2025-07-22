@@ -4,7 +4,7 @@ import java.util.Date;
 
 import lombok.Data;
 
-/* API를 통해 클라이언트에게 자산 정보 전달하는 DTO
+/* API를 통해 클라이언트에게 보여지는 DTO
  * ID와 PW 제외
  * */
 @Data
