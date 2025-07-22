@@ -6,9 +6,8 @@
 <mapper namespace="org.bbagisix.expense.mapper.ExpenseMapper">
     <insert id="insert" parameterType="org.bbagisix.expense.domain.ExpenseVO" useGeneratedKeys="true"
             keyProperty="expenditureId">
-        INSERT INTO expenditure (user_id, category_id, asset_id, amount, description, expenditure_date, created_at,
-                                 updated_at)
-        VALUES (#{userId}, #{categoryId}, #{assetId}, #{amount}, #{description}, #{expenditureDate}, NOW(), NOW())
+        INSERT INTO expenditure (user_id, category_id, asset_id, amount, description, expenditure_date)
+        VALUES (#{userId}, #{categoryId}, #{assetId}, #{amount}, #{description}, #{expenditureDate})
     </insert>
 
     <select id="findById" parameterType="long" resultType="org.bbagisix.expense.domain.ExpenseVO">
@@ -46,8 +45,7 @@
             asset_id         = #{assetId},
             amount           = #{amount},
             description      = #{description},
-            expenditure_date = #{expenditureDate},
-            updated_at       = NOW()
+            expenditure_date = #{expenditureDate}
         WHERE expenditure_id = #{expenditureId}
     </update>
 
