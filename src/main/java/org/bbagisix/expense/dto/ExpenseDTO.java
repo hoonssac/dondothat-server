@@ -10,6 +10,8 @@ public class ExpenseDTO {
 	private Long expenditureId;
 	private String categoryName;
 	private String categoryIcon;
+	private String assetName;
+	private String bankName;
 	private Date createdAt;
 	private Date updatedAt;
 
@@ -17,7 +19,7 @@ public class ExpenseDTO {
 	private Long userId;
 	private Long categoryId;
 	private Long assetId;
-	private int amount;
+	private Long amount;
 	private String description;
 	private Date expenditureDate;
 }
