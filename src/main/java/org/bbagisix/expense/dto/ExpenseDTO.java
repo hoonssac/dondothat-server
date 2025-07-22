@@ -6,12 +6,13 @@ import lombok.Data;
 
 @Data
 public class ExpenseDTO {
-	// 응답 필드
+	// 응답 필드 (서버가 클라이언트에게 응답을 보낼떄만 사용)
 	private Long expenditureId;
 	private String categoryName;
 	private String categoryIcon;
-	private String assetName;
-	private String bankName;
+	// asset 패키지 완성시 연동
+	// private String assetName;
+	// private String bankName;
 	private Date createdAt;
 	private Date updatedAt;
 
