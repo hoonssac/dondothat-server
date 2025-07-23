@@ -28,14 +28,18 @@ import java.util.regex.Pattern;
 @PropertySource({"classpath:/application.properties"})
 @MapperScan(basePackages = {"org.bbagisix.**.mapper"})
 @ComponentScan(
-	basePackages = "org.bbagisix",
+	basePackages = {
+		"org.bbagisix.expense",
+		"org.bbagisix.category", 
+		"org.bbagisix.user"
+	},
 	excludeFilters = {
 		@ComponentScan.Filter(type = org.springframework.context.annotation.FilterType.ANNOTATION, classes = {
 			Controller.class, ControllerAdvice.class})
 	}
 )
-public class RootConfig {
-	private static final Logger log = LogManager.getLogger(RootConfig.class);
+public class TestRootConfig {
+	private static final Logger log = LogManager.getLogger(TestRootConfig.class);
 	@Value("${jdbc.driver}")
 	String driver;
 	@Value("${jdbc.url}")

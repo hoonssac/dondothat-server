@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.bbagisix.config.RootConfig;
+import org.bbagisix.config.TestRootConfig;
 import org.bbagisix.expense.dto.ExpenseDTO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.log4j.Log4j2;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {RootConfig.class})
+@ContextConfiguration(classes = {TestRootConfig.class})
 @Transactional
 @Log4j2
 class ExpenseServiceTest {
