@@ -38,19 +38,28 @@ public class RootConfig {
 	private static final Logger log = LogManager.getLogger(RootConfig.class);
 	@Value("${jdbc.driver}")
 	String driver;
-	@Value("${jdbc.url}")
-	String url;
-	@Value("${jdbc.username}")
+
+	// docker-compose.yml로부터 환경 변수 주입
+	@Value("${DB_HOST:localhost}")
+	String dbHost;
+	@Value("${DB_PORT:3306}")
+	String dbPort;
+	@Value("${DB_NAME:dondothat}")
+	String dbName;
+	@Value("${DB_USER:root}")
 	String username;
-	@Value("${jdbc.password}")
+	@Value("${DB_PASSWORD:dondothat1234}")
 	String password;
 
 	@Bean
 	public DataSource dataSource() {
 		HikariConfig config = new HikariConfig();
 
+		// 환경 변수를 사용하여 JDBC URL 구성
+		String jdbcUrl = String.format("jdbc:log4jdbc:mysql://%s:%s/%s", dbHost, dbPort, dbName);
+
 		config.setDriverClassName(driver);
-		config.setJdbcUrl(url);
+		config.setJdbcUrl(jdbcUrl);
 		config.setUsername(username);
 		config.setPassword(password);
 
@@ -68,13 +77,13 @@ public class RootConfig {
 
 		HikariDataSource dataSource = new HikariDataSource(config);
 
-		log.info("DB Connection: {}", maskDbUrl(url));
+		log.info("DB Connection: {}", maskDbUrl(jdbcUrl));
 
 		return dataSource;
 	}
 
 	private String maskDbUrl(String url) {
-		// jdbc:log4jdbc:mysql://localhost:3306/dondothat -> jdbc:log4jdbc:mysql://lo...st:3306/dondothat
+		// jdbc:log4jdbc:mysql://mysql-server:3306/dondothat -> jdbc:log4jdbc:mysql://my...er:3306/dondothat
 		Pattern pattern = Pattern.compile("(?<=//)([^:/]+)");
 		Matcher matcher = pattern.matcher(url);
 		if (matcher.find()) {
