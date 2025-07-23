@@ -19,10 +19,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @RestController
 @RequestMapping("/api/expenses")
 @RequiredArgsConstructor
+@Log4j2
 public class ExpenseController {
 	private final ExpenseService expenseService;
 	private final CategoryService categoryService;
