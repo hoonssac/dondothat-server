@@ -144,7 +144,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/dondothat:latest
+          tags: ghcr.io/${{ github.actor }}/dondothat:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -154,7 +154,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-      - name: Deploy to EC2
+      - name: Deploy with Docker Compose
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -162,14 +162,61 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           timeout: 300s
           script: |
-            # 기존 컨테이너 중지 및 제거
-            docker stop dondothat-server || true
-            docker rm dondothat-server || true
+            # Docker Compose 파일 생성
+            cat > docker-compose.yml << 'EOF'
+            version: "3.8"
             
-            # 새 이미지 pull
-            docker pull ghcr.io/${{ github.repository_owner }}/dondothat:latest
+            services:
+              dondothat-server:
+                image: ghcr.io/${{ github.actor }}/dondothat:latest
+                container_name: dondothat-server
+                ports:
+                  - "8080:8080"
+                environment:
+                  - SPRING_PROFILES_ACTIVE=prod
+                  - DB_HOST=mysql-server
+                  - DB_USERNAME=root
+                  - DB_PASSWORD=root
+                  - DB_NAME=dondothat
+                depends_on:
+                  - mysql
+                networks:
+                  - dondothat-network
+                restart: unless-stopped
             
-            # 새 컨테이너 실행
+              mysql:
+                image: mysql:8.0
+                container_name: mysql-server
+                environment:
+                  - MYSQL_ROOT_PASSWORD=root
+                  - MYSQL_DATABASE=dondothat
+                ports:
+                  - "3306:3306"
+                volumes:
+                  - mysql_data:/var/lib/mysql
+                networks:
+                  - dondothat-network
+                restart: unless-stopped
+            
+            networks:
+              dondothat-network:
+                driver: bridge
+            
+            volumes:
+              mysql_data:
+            EOF
+            
+            # 최신 이미지 pull
+            docker pull ghcr.io/${{ github.actor }}/dondothat:latest
+            
+            # 서비스 재시작
+            /usr/local/bin/docker-compose down || true
+            /usr/local/bin/docker-compose up -d
+            
+            # 상태 확인
+            sleep 15
+            /usr/local/bin/docker-compose ps
+            /usr/local/bin/docker-compose logs --tail=10 dondothat-server 실행
             docker run -d \
               --name dondothat-server \
               -p 8080:8080 \
@@ -179,12 +226,17 @@ jobs:
               -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
               -e DB_NAME=${{ secrets.DB_NAME }} \
               --restart unless-stopped \
-              ghcr.io/${{ github.repository_owner }}/dondothat:latest
+              ghcr.io/${{ github.actor }}/dondothat:latest
             
-            # 잠시 기다린 후 상태 확인
-            sleep 10
-            docker ps
-            docker logs dondothat-server --tail=20
+            # 컨테이너 시작 확인
+            echo "Waiting for container to start..."
+            sleep 15
             
-            # 헬스체크 (선택사항)
-            curl -f http://localhost:8080/actuator/health || echo "Health check failed"
+            # 상태 확인
+            echo "=== Container Status ==="
+            docker ps | grep dondothat-server || echo "Container not found"
+            
+            echo "=== Application Logs ==="
+            docker logs dondothat-server --tail=10 || echo "No logs available"
+            
+            echo "=== Deployment Complete ==="
