@@ -7,7 +7,7 @@ COPY . .
 RUN chmod +x gradlew
 RUN ./gradlew clean build -x test
 
-FROM tomcat:9.0-jdk17
+FROM tomcat:10.1-jdk17-openjdk-slim
 
 # 기본 ROOT 앱 제거
 RUN rm -rf /usr/local/tomcat/webapps/ROOT
