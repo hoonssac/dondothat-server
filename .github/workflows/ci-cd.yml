@@ -116,17 +116,19 @@ jobs:
       - name: Create Dockerfile
         run: |
           cat > Dockerfile << 'EOF'
-          FROM eclipse-temurin:17-jre-alpine
+          FROM tomcat:9.0-jre17-temurin-alpine
           
-          WORKDIR /app
+          # 기본 webapps 제거
+          RUN rm -rf /usr/local/tomcat/webapps/*
           
-          COPY build/libs/*.war app.war
+          # WAR 파일 복사
+          COPY build/libs/*.war /usr/local/tomcat/webapps/ROOT.war
           
           EXPOSE 8080
           
           ENV SPRING_PROFILES_ACTIVE=prod
           
-          ENTRYPOINT ["java", "-Xmx400m", "-jar", "app.war"]
+          CMD ["catalina.sh", "run"]
           EOF
 
       - name: Set up Docker Buildx
