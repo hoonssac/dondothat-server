@@ -16,7 +16,7 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: root
+          MYSQL_ROOT_PASSWORD: dondothat
           MYSQL_DATABASE: dondothat
         ports:
           - 3306:3306
@@ -160,7 +160,7 @@ jobs:
                   - SPRING_PROFILES_ACTIVE=prod
                   - DB_HOST=mysql-server
                   - DB_USERNAME=root
-                  - DB_PASSWORD=root
+                  - DB_PASSWORD=dondothat1234
                   - DB_NAME=dondothat
                 depends_on:
                   - mysql
