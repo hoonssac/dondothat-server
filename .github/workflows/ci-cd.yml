@@ -16,7 +16,7 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: dondothat
+          MYSQL_ROOT_PASSWORD: dondothat1234
           MYSQL_DATABASE: dondothat
         ports:
           - 3306:3306
@@ -65,9 +65,9 @@ jobs:
 
       - name: Verify MySQL connection and create test database
         run: |
-          mysql -h127.0.0.1 -uroot -proot -e "SELECT VERSION();"
-          mysql -h127.0.0.1 -uroot -proot -e "CREATE DATABASE IF NOT EXISTS dondothat CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-          mysql -h127.0.0.1 -uroot -proot -e "SHOW DATABASES;"
+          mysql -h127.0.0.1 -uroot -pdondothat1234 -e "SELECT VERSION();"  # 수정
+          mysql -h127.0.0.1 -uroot -pdondothat1234 -e "CREATE DATABASE IF NOT EXISTS dondothat CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"  # 수정
+          mysql -h127.0.0.1 -uroot -pdondothat1234 -e "SHOW DATABASES;"  # 수정
 
       - name: Run tests
         run: |
@@ -172,7 +172,7 @@ jobs:
                 image: mysql:8.0
                 container_name: mysql-server
                 environment:
-                  - MYSQL_ROOT_PASSWORD=root
+                  - MYSQL_ROOT_PASSWORD=dondothat1234
                   - MYSQL_DATABASE=dondothat
                 ports:
                   - "3306:3306"
