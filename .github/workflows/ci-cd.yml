@@ -132,18 +132,19 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to Docker Hub
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/dondothat:latest
+          tags: ghcr.io/${{ github.repository_owner }}/dondothat:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -166,7 +167,7 @@ jobs:
             docker rm dondothat-server || true
             
             # 새 이미지 pull
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/dondothat:latest
+            docker pull ghcr.io/${{ github.repository_owner }}/dondothat:latest
             
             # 새 컨테이너 실행
             docker run -d \
@@ -178,7 +179,7 @@ jobs:
               -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
               -e DB_NAME=${{ secrets.DB_NAME }} \
               --restart unless-stopped \
-              ${{ secrets.DOCKERHUB_USERNAME }}/dondothat:latest
+              ghcr.io/${{ github.repository_owner }}/dondothat:latest
             
             # 잠시 기다린 후 상태 확인
             sleep 10
