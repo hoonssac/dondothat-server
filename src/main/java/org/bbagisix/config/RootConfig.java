@@ -28,10 +28,12 @@ import java.util.regex.Pattern;
 @PropertySource({"classpath:/application.properties"})
 @MapperScan(basePackages = {"org.bbagisix.**.mapper"})
 @ComponentScan(
-	basePackages = "org.bbagisix", // 스캔 범위는 동일
-	excludeFilters = {            // 제외할 필터를 지정
+	basePackages = "org.bbagisix",
+	excludeFilters = {
 		@ComponentScan.Filter(type = org.springframework.context.annotation.FilterType.ANNOTATION, classes = {
-			Controller.class, ControllerAdvice.class})
+			Controller.class, ControllerAdvice.class}),
+		@ComponentScan.Filter(type = org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE, classes = {
+			ServletConfig.class, WebSocketConfig.class})
 	}
 )
 public class RootConfig {
