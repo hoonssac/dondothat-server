@@ -113,24 +113,6 @@ jobs:
       - name: Build with Gradle
         run: java -classpath gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain build -x test
 
-      - name: Create Dockerfile for Spring Legacy
-        run: |
-          cat > Dockerfile << 'EOF'
-          FROM tomcat:9.0-alpine
-          
-          # 기본 webapps 제거
-          RUN rm -rf /usr/local/tomcat/webapps/*
-          
-          # WAR 파일을 ROOT로 배포
-          COPY build/libs/*.war /usr/local/tomcat/webapps/ROOT.war
-          
-          EXPOSE 8080
-          
-          ENV SPRING_PROFILES_ACTIVE=prod
-          
-          CMD ["catalina.sh", "run"]
-          EOF
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
