@@ -35,6 +35,7 @@ public class ExpenseController {
 
 	@PostMapping
 	public ResponseEntity<ExpenseDTO> createExpense(@RequestBody ExpenseDTO expenseDTO) {
+		// user 패키지 구현 시 수정
 		expenseDTO.setUserId(1L);
 		ExpenseDTO createdExpense = expenseService.createExpense(expenseDTO);
 		return new ResponseEntity<>(createdExpense, HttpStatus.CREATED);
