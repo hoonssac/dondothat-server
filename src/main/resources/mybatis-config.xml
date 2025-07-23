@@ -4,6 +4,8 @@
         "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
     <typeAliases>
-        <typeAlias alias="ChatMessage" type="org.bbagisix.chat.entity.ChatMessage"/>
+        <package name="org.bbagisix.chat.entity"/>
+        <package name="org.bbagisix.expense.dto"/>
+        <package name="org.bbagisix.category.dto"/>
     </typeAliases>
 </configuration>
