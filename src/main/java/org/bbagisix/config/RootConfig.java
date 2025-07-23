@@ -48,7 +48,7 @@ public class RootConfig {
 	String dbName;
 	@Value("${DB_USER:root}")
 	String username;
-	@Value("${DB_PASSWORD:dondothat1234}")
+	@Value("${DB_PASSWORD:1234}")
 	String password;
 
 	@Bean
