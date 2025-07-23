@@ -1,11 +1,13 @@
-FROM openjdk:17-jdk-slim as build
+FROM openjdk:17-jdk-slim AS build
 
 WORKDIR /app
 COPY . .
 
-# Gradle로 WAR 빌드
+# Gradle Wrapper 실행 권한 부여
 RUN chmod +x gradlew
-RUN ./gradlew clean build -x test
+
+# Gradle 빌드 (정확한 경로로 실행)
+RUN ./gradlew clean build -x test --no-daemon
 
 FROM tomcat:10.1-jdk17-openjdk-slim
 
