@@ -116,7 +116,7 @@ jobs:
       - name: Create Dockerfile for Spring Legacy
         run: |
           cat > Dockerfile << 'EOF'
-          FROM tomcat:9.0-jre17-temurin-alpine
+          FROM tomcat:9.0-alpine
           
           # 기본 webapps 제거
           RUN rm -rf /usr/local/tomcat/webapps/*
@@ -218,27 +218,4 @@ jobs:
             # 상태 확인
             sleep 15
             /usr/local/bin/docker-compose ps
-            /usr/local/bin/docker-compose logs --tail=10 dondothat-server 실행
-            docker run -d \
-              --name dondothat-server \
-              -p 8080:8080 \
-              -e SPRING_PROFILES_ACTIVE=prod \
-              -e DB_HOST=${{ secrets.DB_HOST }} \
-              -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
-              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              -e DB_NAME=${{ secrets.DB_NAME }} \
-              --restart unless-stopped \
-              ghcr.io/${{ github.actor }}/dondothat:latest
-            
-            # 컨테이너 시작 확인
-            echo "Waiting for container to start..."
-            sleep 15
-            
-            # 상태 확인
-            echo "=== Container Status ==="
-            docker ps | grep dondothat-server || echo "Container not found"
-            
-            echo "=== Application Logs ==="
-            docker logs dondothat-server --tail=10 || echo "No logs available"
-            
-            echo "=== Deployment Complete ==="
+            /usr/local/bin/docker-compose logs --tail=10 dondothat-server
