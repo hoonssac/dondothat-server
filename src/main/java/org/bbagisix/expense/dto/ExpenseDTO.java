@@ -2,9 +2,19 @@ package org.bbagisix.expense.dto;
 
 import java.util.Date;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-@Data
+@Getter
+@Setter
+@ToString
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ExpenseDTO {
 	// 응답 필드 (서버가 클라이언트에게 응답을 보낼떄만 사용)
 	private Long expenditureId;

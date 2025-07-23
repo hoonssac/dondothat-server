@@ -2,9 +2,19 @@ package org.bbagisix.expense.domain;
 
 import java.util.Date;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-@Data
+@Getter
+@Setter
+@ToString
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ExpenseVO {
 	private Long expenditureId;
 	private Long userId;

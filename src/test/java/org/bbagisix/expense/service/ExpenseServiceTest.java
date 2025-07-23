@@ -28,14 +28,14 @@ class ExpenseServiceTest {
 	private ExpenseService service;
 
 	private ExpenseDTO createTestExpenseDTO() {
-		ExpenseDTO expenseDTO = new ExpenseDTO();
-		expenseDTO.setUserId(1L); // user_id를 1로 고정
-		expenseDTO.setCategoryId(1L);
-		expenseDTO.setAssetId(1L);
-		expenseDTO.setAmount(50000L);
-		expenseDTO.setDescription("test");
-		expenseDTO.setExpenditureDate(new Date());
-		return expenseDTO;
+		return ExpenseDTO.builder()
+			.userId(1L) // user_id를 1로 고정
+			.categoryId(1L)
+			.assetId(1L)
+			.amount(50000L)
+			.description("test")
+			.expenditureDate(new Date())
+			.build();
 	}
 
 	@Test
@@ -89,13 +89,14 @@ class ExpenseServiceTest {
 		Long id = createExpense.getExpenditureId();
 
 		// when
-		ExpenseDTO updateExpense = new ExpenseDTO();
-		updateExpense.setUserId(1L);
-		updateExpense.setCategoryId(2L);
-		updateExpense.setAssetId(1L);
-		updateExpense.setAmount(99000L);
-		updateExpense.setDescription("수정 내역");
-		updateExpense.setExpenditureDate(new Date());
+		ExpenseDTO updateExpense = ExpenseDTO.builder()
+			.userId(1L)
+			.categoryId(2L)
+			.assetId(1L)
+			.amount(99000L)
+			.description("수정 내역")
+			.expenditureDate(new Date())
+			.build();
 
 		ExpenseDTO updatedExpense = service.updateExpense(id, updateExpense);
 

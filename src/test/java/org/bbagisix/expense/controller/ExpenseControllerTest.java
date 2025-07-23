@@ -58,14 +58,14 @@ class ExpenseControllerTest {
 	}
 
 	private ExpenseDTO createTestExpenseDTO(String description, Long amount) {
-		ExpenseDTO expenseDTO = new ExpenseDTO();
-		expenseDTO.setUserId(1L);
-		expenseDTO.setCategoryId(1L);
-		expenseDTO.setAssetId(1L);
-		expenseDTO.setAmount(amount);
-		expenseDTO.setDescription(description);
-		expenseDTO.setExpenditureDate(new java.util.Date());
-		return expenseDTO;
+		return ExpenseDTO.builder()
+			.userId(1L)
+			.categoryId(1L)
+			.assetId(1L)
+			.amount(amount)
+			.description(description)
+			.expenditureDate(new java.util.Date())
+			.build();
 	}
 
 	@Test
@@ -120,8 +120,14 @@ class ExpenseControllerTest {
 		ExpenseDTO createdExpense = expenseService.createExpense(createTestExpenseDTO("원본 데이터", 120000L));
 		Long expenseId = createdExpense.getExpenditureId();
 
-		ExpenseDTO updatedDto = createTestExpenseDTO("수정된 데이터", 9999L);
-		updatedDto.setCategoryId(2L);
+		ExpenseDTO updatedDto = ExpenseDTO.builder()
+			.userId(1L)
+			.categoryId(2L)
+			.assetId(1L)
+			.amount(9999L)
+			.description("수정된 데이터")
+			.expenditureDate(new java.util.Date())
+			.build();
 		String jsonContent = objectMapper.writeValueAsString(updatedDto);
 
 		// when

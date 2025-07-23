@@ -65,29 +65,31 @@ public class ExpenseServiceImpl implements ExpenseService {
 	private ExpenseVO dtoToVo(ExpenseDTO dto) {
 		if (dto == null)
 			return null;
-		ExpenseVO vo = new ExpenseVO();
-		vo.setUserId(dto.getUserId());
-		vo.setCategoryId(dto.getCategoryId());
-		vo.setAssetId(dto.getAssetId());
-		vo.setAmount(dto.getAmount());
-		vo.setDescription(dto.getDescription());
-		vo.setExpenditureDate(dto.getExpenditureDate());
-		return vo;
+		return ExpenseVO.builder()
+			.userId(dto.getUserId())
+			.categoryId(dto.getCategoryId())
+			.assetId(dto.getAssetId())
+			.amount(dto.getAmount())
+			.description(dto.getDescription())
+			.expenditureDate(dto.getExpenditureDate())
+			.build();
 	}
 
 	private ExpenseDTO voToDto(ExpenseVO vo) {
 		if (vo == null)
 			return null;
-		ExpenseDTO dto = new ExpenseDTO();
-		dto.setExpenditureId(vo.getExpenditureId());
-		dto.setUserId(vo.getUserId());
-		dto.setCategoryId(vo.getCategoryId());
-		dto.setAssetId(vo.getAssetId());
-		dto.setAmount(vo.getAmount());
-		dto.setDescription(vo.getDescription());
-		dto.setExpenditureDate(vo.getExpenditureDate());
-		dto.setCreatedAt(vo.getCreatedAt());
-		dto.setUpdatedAt(vo.getUpdatedAt());
+
+		ExpenseDTO dto = ExpenseDTO.builder()
+			.expenditureId(vo.getExpenditureId())
+			.userId(vo.getUserId())
+			.categoryId(vo.getCategoryId())
+			.assetId(vo.getAssetId())
+			.amount(vo.getAmount())
+			.description(vo.getDescription())
+			.expenditureDate(vo.getExpenditureDate())
+			.createdAt(vo.getCreatedAt())
+			.updatedAt(vo.getUpdatedAt())
+			.build();
 
 		if (vo.getCategoryId() != null) {
 			CategoryVO categoryVO = categoryMapper.findById(vo.getCategoryId());
