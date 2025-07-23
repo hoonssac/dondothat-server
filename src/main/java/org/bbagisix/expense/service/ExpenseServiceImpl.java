@@ -26,7 +26,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 	public ExpenseDTO createExpense(ExpenseDTO expenseDTO) {
 		ExpenseVO vo = dtoToVo(expenseDTO);
 		expenseMapper.insert(vo);
-		return voToDto(expenseMapper.findById(vo.getExpenditureId()));
+		return voToDto(vo);
 	}
 
 	@Override
