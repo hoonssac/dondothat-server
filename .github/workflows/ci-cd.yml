@@ -63,11 +63,12 @@ jobs:
             exit 1
           fi
 
-      - name: Verify MySQL connection and create test database
+      - name: Setup database schema and test data
         run: |
-          mysql -h127.0.0.1 -uroot -pdondothat1234 -e "SELECT VERSION();"  # 수정
-          mysql -h127.0.0.1 -uroot -pdondothat1234 -e "CREATE DATABASE IF NOT EXISTS dondothat CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"  # 수정
-          mysql -h127.0.0.1 -uroot -pdondothat1234 -e "SHOW DATABASES;"  # 수정
+          mysql -h127.0.0.1 -uroot -pdondothat1234 -e "SELECT VERSION();"
+          mysql -h127.0.0.1 -uroot -pdondothat1234 < sql/schema.sql
+          mysql -h127.0.0.1 -uroot -pdondothat1234 dondothat < sql/test-data.sql
+          mysql -h127.0.0.1 -uroot -pdondothat1234 -e "SHOW DATABASES;"
 
       - name: Run tests
         run: |
@@ -77,6 +78,11 @@ jobs:
           java -classpath gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain test
         env:
           SPRING_PROFILES_ACTIVE: test
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_NAME: dondothat
+          DB_USER: root
+          DB_PASSWORD: dondothat1234
 
       - name: Generate test report
         uses: dorny/test-reporter@v1
@@ -135,7 +141,7 @@ jobs:
   deploy:
     needs: [test, build-and-push]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'  # 배포는 main 브랜치만
 
     steps:
       - name: Deploy with Docker Compose

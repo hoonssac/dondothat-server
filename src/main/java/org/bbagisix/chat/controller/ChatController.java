@@ -165,7 +165,6 @@ public class ChatController {
 
 			// 안전한 세션 저장
 			saveToSession(headerAccessor, challengeId, userId, userName);
-
 		} catch (Exception e) {
 			log.error("입장 오류 처리 중 추가 오류: ", e);
 		}
