@@ -77,6 +77,11 @@ jobs:
           java -classpath gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain test
         env:
           SPRING_PROFILES_ACTIVE: test
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_NAME: dondothat
+          DB_USER: root
+          DB_PASSWORD: dondothat1234
 
       - name: Generate test report
         uses: dorny/test-reporter@v1
