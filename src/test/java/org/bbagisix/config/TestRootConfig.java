@@ -46,7 +46,7 @@ public class TestRootConfig {
 	String url;
 	@Value("${jdbc.username}")
 	String username;
-	@Value("${jdbc.password}")
+	@Value("1234")
 	String password;
 
 	@Bean
