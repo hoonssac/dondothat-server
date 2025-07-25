@@ -83,7 +83,7 @@ jobs:
             
             services:
               redis-server:
-                image: redis:7-alphine
+                image: redis:7-alpine
                 container_name: redis-server
                 restart: always
                 ports:
