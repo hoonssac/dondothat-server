@@ -39,6 +39,24 @@ dependencies {
     implementation "org.springframework:spring-tx:${springVersion}"
     implementation "org.springframework:spring-jdbc:${springVersion}"
 
+    // Spring Security
+    implementation "org.springframework.security:spring-security-core:${springVersion}"
+    implementation "org.springframework.security:spring-security-web:${springVersion}"
+    implementation "org.springframework.security:spring-security-config:${springVersion}"
+
+    // OAuth2 Client
+    implementation 'org.springframework.security:spring-security-oauth2-client:5.8.12'
+    implementation 'org.springframework.security:spring-security-oauth2-core:5.8.12'
+    implementation 'org.springframework.security:spring-security-oauth2-jose:5.8.12'
+
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    // HTTP Client
+    implementation 'org.apache.httpcomponents:httpclient:4.5.14'
+
     // Web Socket
     implementation "org.springframework:spring-websocket:${springVersion}"
     implementation "org.springframework:spring-messaging:${springVersion}"
