@@ -40,9 +40,9 @@ dependencies {
     implementation "org.springframework:spring-jdbc:${springVersion}"
 
     // Spring Security
-    implementation "org.springframework.security:spring-security-core:${springVersion}"
-    implementation "org.springframework.security:spring-security-web:${springVersion}"
-    implementation "org.springframework.security:spring-security-config:${springVersion}"
+    implementation "org.springframework.security:spring-security-core:5.8.12"
+    implementation "org.springframework.security:spring-security-web:5.8.12"
+    implementation "org.springframework.security:spring-security-config:5.8.12"
 
     // OAuth2 Client
     implementation 'org.springframework.security:spring-security-oauth2-client:5.8.12'
