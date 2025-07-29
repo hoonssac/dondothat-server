@@ -1,41 +1,39 @@
 package org.bbagisix.config;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		
 		// csrf disable
-		http.csrf((auth) -> auth.disable());
+		http.csrf().disable();
 
 		// Form 로그인 방식 disable
-		http.formLogin((auth) -> auth.disable());
+		http.formLogin().disable();
 
 		// HTTP basic 인증 방식 disable
-		http.httpBasic((auth) -> auth.disable());
+		http.httpBasic().disable();
 
 		// oauth2
-		http.oauth2Login(Customizer.withDefaults());
+		http.oauth2Login()
+			.defaultSuccessUrl("/")  // 로그인 성공 시 리다이렉트 URL
+			.failureUrl("/login?error");  // 로그인 실패 시 리다이렉트 URL
 
 		// 경로별 인가 작업
-		http.authorizeHttpRequests((auth) -> auth
-			.requestMatchers("/").permitAll()
-			.anyRequest().authenticated());
+		http.authorizeRequests()
+			.antMatchers("/", "/login", "/error", "/resources/**").permitAll()
+			.anyRequest().authenticated();
 
 		// 세션 설정 : STATELESS
-		http.sessionManagement((session) -> session
-			.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-		return http.build();
+		http.sessionManagement()
+			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 	}
 }
