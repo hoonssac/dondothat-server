@@ -2,20 +2,36 @@ package org.bbagisix.oauth2.config;
 
 import lombok.RequiredArgsConstructor;
 import org.bbagisix.oauth2.service.CustomOAuth2UserService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
+import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 
 @Configuration
 @EnableWebSecurity
+@PropertySource("classpath:application.properties")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	private final CustomOAuth2UserService customOAuth2UserService;
+	private final Environment environment; // Properties 값 읽기용
 
-	public SecurityConfig(CustomOAuth2UserService customOAuth2UserService) {
+	public SecurityConfig(CustomOAuth2UserService customOAuth2UserService, Environment environment) {
 		this.customOAuth2UserService = customOAuth2UserService;
+		this.environment = environment;
 	}
 
 	@Override
@@ -30,18 +46,70 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		// HTTP basic 인증 방식 disable
 		http.httpBasic().disable();
 
-		// oauth2
-		http.oauth2Login((oauth2) -> oauth2
-			.userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
-				.userService(customOAuth2UserService)));
+		// 세션 설정 (OAuth2에서는 세션 필요)
+		http.sessionManagement()
+			.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
 
-		// 경로별 인가 작업
+		// 경로별 인가 작업 (OAuth2 경로 허용)
 		http.authorizeRequests()
-			.antMatchers("/", "/login", "/error", "/resources/**", "/oauth2/**", "/login/oauth2/**").permitAll()
+			.antMatchers("/", "/oauth2-login", "/oauth2-success", "/error", "/resources/**", 
+						"/oauth2/**", "/login/oauth2/**", "/debug/**").permitAll()
 			.anyRequest().authenticated();
 
-		// 세션 설정 : STATELESS
-		http.sessionManagement()
-			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+		// OAuth2 로그인 설정 - 이것이 필터를 자동 등록해야 함
+		http.oauth2Login()
+			.clientRegistrationRepository(clientRegistrationRepository())
+			.userInfoEndpoint()
+				.userService(customOAuth2UserService)
+			.and()
+			.defaultSuccessUrl("/oauth2-success", true)
+			.failureUrl("/oauth2-login?error");
+	}
+
+	@Bean
+	public ClientRegistrationRepository clientRegistrationRepository() {
+		return new InMemoryClientRegistrationRepository(
+			googleClientRegistration(),
+			naverClientRegistration()
+		);
+	}
+
+	@Bean
+	public OAuth2AuthorizedClientService authorizedClientService() {
+		return new InMemoryOAuth2AuthorizedClientService(clientRegistrationRepository());
+	}
+
+	@Bean
+	public ClientRegistration googleClientRegistration() {
+		return ClientRegistration.withRegistrationId("google")
+			.clientId(environment.getProperty("spring.security.oauth2.client.registration.google.client-id"))
+			.clientSecret(environment.getProperty("spring.security.oauth2.client.registration.google.client-secret"))
+			.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+			.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+			.redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+			.scope("profile", "email")
+			.authorizationUri("https://accounts.google.com/o/oauth2/auth")
+			.tokenUri("https://oauth2.googleapis.com/token")
+			.userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
+			.userNameAttributeName("sub")
+			.clientName("Google")
+			.build();
+	}
+
+	@Bean
+	public ClientRegistration naverClientRegistration() {
+		return ClientRegistration.withRegistrationId("naver")
+			.clientId(environment.getProperty("spring.security.oauth2.client.registration.naver.client-id"))
+			.clientSecret(environment.getProperty("spring.security.oauth2.client.registration.naver.client-secret"))
+			.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+			.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+			.redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+			.scope("name", "email")
+			.authorizationUri("https://nid.naver.com/oauth2.0/authorize")
+			.tokenUri("https://nid.naver.com/oauth2.0/token")
+			.userInfoUri("https://openapi.naver.com/v1/nid/me")
+			.userNameAttributeName("response")
+			.clientName("Naver")
+			.build();
 	}
 }
