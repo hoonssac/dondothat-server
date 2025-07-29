@@ -32,7 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class CodefApiService {
 
-	@Value("${codef.publicKey}")
+	@Value("${CODEF_PUBLIC_KEY:}")
 	private String publicKey;
 
 	@Autowired(required = false)

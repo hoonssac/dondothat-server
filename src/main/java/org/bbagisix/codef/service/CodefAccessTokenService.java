@@ -29,9 +29,9 @@ public class CodefAccessTokenService {
 
 	private static final String OAUTH_URL = "https://oauth.codef.io/oauth/token";
 
-	@Value("${codef.clientId}")
+	@Value("${CODEF_CLIENT_ID:}")
 	private String clientId;
-	@Value("${codef.clientSecret}")
+	@Value("${CODEF_CLIENT_SECRET:}")
 	private String clientSecret;
 
 	@Autowired
