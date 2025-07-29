@@ -10,10 +10,13 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	private final CustomOAuth2UserService customOAuth2UserService;
+
+	public SecurityConfig(CustomOAuth2UserService customOAuth2UserService) {
+		this.customOAuth2UserService = customOAuth2UserService;
+	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -28,12 +31,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http.httpBasic().disable();
 
 		// oauth2
-		http.oauth2Login()
-			.userInfoEndpoint()
-				.userService(customOAuth2UserService)  // CustomOAuth2UserService 등록
-			.and()
-			.defaultSuccessUrl("/")  // 로그인 성공 시 리다이렉트 URL
-			.failureUrl("/login?error");  // 로그인 실패 시 리다이렉트 URL
+		http.oauth2Login((oauth2) -> oauth2
+			.userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
+				.userService(customOAuth2UserService)));
 
 		// 경로별 인가 작업
 		http.authorizeRequests()
