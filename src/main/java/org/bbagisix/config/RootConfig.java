@@ -73,6 +73,26 @@ public class RootConfig {
 	@Value("${spring.mail.password}")
 	private String mailPassword;
 
+	// OAuth 환경 변수
+	@Value("${GOOGLE_CLIENT_ID:}")
+	private String googleClientId;
+	@Value("${GOOGLE_CLIENT_SECRET:}")
+	private String googleClientSecret;
+	@Value("${NAVER_CLIENT_ID:}")
+	private String naverClientId;
+	@Value("${NAVER_CLIENT_SECRET:}")
+	private String naverClientSecret;
+	@Value("${BASE_URL:}")
+	private String baseUrl;
+
+	// CODEF 환경 변수
+	@Value("${CODEF_CLIENT_ID:}")
+	private String codefClientId;
+	@Value("${CODEF_CLIENT_SECRET:}")
+	private String codefClientSecret;
+	@Value("${CODEF_PUBLIC_KEY:}")
+	private String codefPublicKey;
+
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		return new PropertySourcesPlaceholderConfigurer();
