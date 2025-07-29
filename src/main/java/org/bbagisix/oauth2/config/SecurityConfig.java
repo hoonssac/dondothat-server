@@ -1,5 +1,7 @@
 package org.bbagisix.oauth2.config;
 
+import lombok.RequiredArgsConstructor;
+import org.bbagisix.oauth2.service.CustomOAuth2UserService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -8,7 +10,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+	private final CustomOAuth2UserService customOAuth2UserService;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -24,12 +29,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 		// oauth2
 		http.oauth2Login()
+			.userInfoEndpoint()
+				.userService(customOAuth2UserService)  // CustomOAuth2UserService 등록
+			.and()
 			.defaultSuccessUrl("/")  // 로그인 성공 시 리다이렉트 URL
 			.failureUrl("/login?error");  // 로그인 실패 시 리다이렉트 URL
 
 		// 경로별 인가 작업
 		http.authorizeRequests()
-			.antMatchers("/", "/login", "/error", "/resources/**").permitAll()
+			.antMatchers("/", "/login", "/error", "/resources/**", "/oauth2/**", "/login/oauth2/**").permitAll()
 			.anyRequest().authenticated();
 
 		// 세션 설정 : STATELESS
