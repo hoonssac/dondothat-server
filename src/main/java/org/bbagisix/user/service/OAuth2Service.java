@@ -1,4 +1,4 @@
-package org.bbagisix.oauth2.service;
+package org.bbagisix.user.service;
 
 public interface OAuth2Service {
 	String getGoogleAccessToken(String code);

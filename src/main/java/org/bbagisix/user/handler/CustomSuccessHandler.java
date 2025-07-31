@@ -1,13 +1,12 @@
-package org.bbagisix.oauth2.handler;
+package org.bbagisix.user.handler;
 
 import java.io.IOException;
 
-import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.bbagisix.oauth2.dto.CustomOAuth2User;
+import org.bbagisix.user.dto.CustomOAuth2User;
 import org.bbagisix.user.util.JWTUtil;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;

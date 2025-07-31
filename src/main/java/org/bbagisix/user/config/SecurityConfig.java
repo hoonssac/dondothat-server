@@ -1,8 +1,7 @@
-package org.bbagisix.oauth2.config;
+package org.bbagisix.user.config;
 
-import org.bbagisix.oauth2.handler.CustomSuccessHandler;
-import org.bbagisix.oauth2.service.CustomOAuth2UserService;
-import org.springframework.beans.factory.annotation.Value;
+import org.bbagisix.user.handler.CustomSuccessHandler;
+import org.bbagisix.user.service.CustomOAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
