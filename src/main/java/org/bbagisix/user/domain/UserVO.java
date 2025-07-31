@@ -12,12 +12,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserVO {
-	private Long id;
+	private Long userId;
 	private String name;
 	private String email;
 	private String password;
-	private Long point;
 	private String nickname;
+	private String socialId;
+	private String role;
 	private boolean emailVerified;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;

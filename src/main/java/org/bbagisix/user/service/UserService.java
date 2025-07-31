@@ -47,7 +47,6 @@ public class UserService {
 			.password(signUpRequest.getPassword())
 			.email(signUpRequest.getEmail())
 			.emailVerified(true)
-			.point(0L)
 			.build();
 
 		userMapper.insertUser(user);
