@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.bbagisix.user.dto.CustomOAuth2User;
 import org.bbagisix.user.dto.UserDTO;
-import org.bbagisix.user.util.JWTUtil;
+import org.bbagisix.user.util.JwtUtil;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
 
-	private final JWTUtil jwtUtil;
+	private final JwtUtil jwtUtil;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,

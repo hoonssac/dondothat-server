@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.bbagisix.user.dto.CustomOAuth2User;
-import org.bbagisix.user.util.JWTUtil;
+import org.bbagisix.user.util.JwtUtil;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CustomSuccessHandler implements AuthenticationSuccessHandler {
 
-	private final JWTUtil jwtUtil;
+	private final JwtUtil jwtUtil;
 
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -28,7 +28,7 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
 
 		String name = customOAuth2User.getName();
 		String role = customOAuth2User.getRole();
-		String token = jwtUtil.createJwt(name, role, 60 * 60 * 1000L);
+		String token = jwtUtil.createToken(name, role, 60 * 60 * 1000L);
 
 		String redirectUrl = "https://dondothat.netlify.app/oauth-redirect?token=" + token;
 		response.sendRedirect(redirectUrl);

@@ -1,9 +1,9 @@
 package org.bbagisix.config;
 
 import org.bbagisix.user.filter.JWTFilter;
-import org.bbagisix.user.handler.CustomSuccessHandler;
+import org.bbagisix.user.handler.CustomOAuth2SuccessHandler;
 import org.bbagisix.user.service.CustomOAuth2UserService;
-import org.bbagisix.user.util.JWTUtil;
+import org.bbagisix.user.util.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -31,8 +31,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	private final CustomOAuth2UserService customOAuth2UserService;
 	private final Environment environment;
-	private final CustomSuccessHandler customSuccessHandler;
-	private final JWTUtil jwtUtil;
+	private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
+	private final JwtUtil jwtUtil;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -64,7 +64,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.userInfoEndpoint()
 				.userService(customOAuth2UserService)
 			.and()
-			.successHandler(customSuccessHandler)
+			.successHandler(customOAuth2SuccessHandler)
 			.failureUrl("/oauth2-login?error");
 	}
 
