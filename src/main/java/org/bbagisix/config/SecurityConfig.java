@@ -1,5 +1,7 @@
 package org.bbagisix.config;
 
+import java.util.Arrays;
+
 import org.bbagisix.user.filter.JWTFilter;
 import org.bbagisix.user.handler.CustomOAuth2SuccessHandler;
 import org.bbagisix.user.service.CustomOAuth2UserService;
@@ -20,6 +22,9 @@ import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClient
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import lombok.RequiredArgsConstructor;
 
@@ -74,6 +79,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			googleClientRegistration(environment),
 			naverClientRegistration(environment)
 		);
+	}
+
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+
+		configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "https://dondothat.netlify.app"));
+		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		configuration.setAllowedHeaders(Arrays.asList("*"));
+		configuration.setAllowCredentials(true);
+
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration); // 모든 경로에 대해 위 설정 적용
+		return source;
 	}
 
 	@Bean
