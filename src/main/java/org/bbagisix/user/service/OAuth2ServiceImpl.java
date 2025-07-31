@@ -1,7 +1,7 @@
-package org.bbagisix.oauth2.service;
+package org.bbagisix.user.service;
 
 
-import org.bbagisix.oauth2.dto.GoogleTokenResponse;
+import org.bbagisix.user.dto.GoogleTokenResponse;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;

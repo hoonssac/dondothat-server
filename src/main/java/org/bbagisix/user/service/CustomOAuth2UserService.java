@@ -1,13 +1,13 @@
-package org.bbagisix.oauth2.service;
+package org.bbagisix.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.bbagisix.oauth2.dto.CustomOAuth2User;
-import org.bbagisix.oauth2.dto.UserDTO;
-import org.bbagisix.oauth2.dto.GoogleResponse;
-import org.bbagisix.oauth2.dto.NaverResponse;
-import org.bbagisix.oauth2.dto.OAuth2Response;
+import org.bbagisix.user.dto.CustomOAuth2User;
+import org.bbagisix.user.dto.UserDTO;
+import org.bbagisix.user.dto.GoogleResponse;
+import org.bbagisix.user.dto.NaverResponse;
+import org.bbagisix.user.dto.OAuth2Response;
 import org.bbagisix.user.domain.UserVO;
 import org.bbagisix.user.mapper.UserMapper;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;

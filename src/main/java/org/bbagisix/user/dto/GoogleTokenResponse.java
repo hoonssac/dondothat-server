@@ -1,4 +1,4 @@
-package org.bbagisix.oauth2.dto;
+package org.bbagisix.user.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
