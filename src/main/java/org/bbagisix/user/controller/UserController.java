@@ -2,12 +2,16 @@ package org.bbagisix.user.controller;
 
 import javax.validation.Valid;
 
+import org.apache.ibatis.annotations.Param;
 import org.bbagisix.user.dto.CustomOAuth2User;
 import org.bbagisix.user.dto.SendCodeRequest;
 import org.bbagisix.user.dto.SignUpRequest;
+import org.bbagisix.user.dto.UserDTO;
+import org.bbagisix.user.dto.UserResponse;
 import org.bbagisix.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,24 +26,23 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserController {
 
-	private final UserService userServices;
+	private final UserService userService;
 
 	@PostMapping("/send-verification")
 	public ResponseEntity<String> sendCode(@Valid @RequestBody SendCodeRequest request) {
-		userServices.sendVerificationCode(request.getEmail());
+		userService.sendVerificationCode(request.getEmail());
 		return ResponseEntity.ok("인증 코드가 이메일로 발송되었습니다.");
 	}
 
 	@PostMapping("/signup")
 	public ResponseEntity<String> signUp(@Valid @RequestBody SignUpRequest request) {
-		userServices.signUp(request);
+		userService.signUp(request);
 		return ResponseEntity.status(HttpStatus.CREATED).body("회원가입이 성공적으로 완료되었습니다.");
 	}
 
 	@GetMapping("/me")
-	public ResponseEntity<?> getMyInfo(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
-		String name = customOAuth2User.getName();
-		String role = customOAuth2User.getRole();
-		return ResponseEntity.ok("name: " + name + ", role: " + role);
+	public ResponseEntity<UserResponse> getCurrentUser(Authentication authentication) {
+		UserResponse userResponse = userService.findByEmail(authentication.getName());
+		return ResponseEntity.ok(userResponse);
 	}
 }
