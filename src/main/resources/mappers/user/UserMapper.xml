@@ -29,4 +29,8 @@
     <select id="findBySocialId" resultType="org.bbagisix.user.domain.UserVO">
         select * from user where social_id = #{socialId}
     </select>
+
+    <select id="findByEmail" resultType="org.bbagisix.user.domain.UserVO">
+        select * from user where email = #{email}
+    </select>
 </mapper>

@@ -2,6 +2,8 @@ package org.bbagisix.user.service;
 
 import org.bbagisix.user.domain.UserVO;
 import org.bbagisix.user.dto.SignUpRequest;
+import org.bbagisix.user.dto.UserDTO;
+import org.bbagisix.user.dto.UserResponse;
 import org.bbagisix.user.mapper.UserMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,21 @@ public class UserService {
 		String code = emailService.generateVerificationCode();
 		verificationStorageService.saveCode(email, code);
 		emailService.sendVerificationCode(email, code);
+	}
+
+	public UserResponse findByEmail(String email) {
+		UserVO userVO = userMapper.findByEmail(email);
+		if (userVO == null) {
+			return null;
+		}
+
+		return UserResponse.builder()
+			.name(userVO.getName())
+			.email(userVO.getEmail())
+			.nickname(userVO.getNickname())
+			.role(userVO.getRole())
+			.assetConnected(userVO.isAssetConnected())
+			.build();
 	}
 
 	@Transactional
