@@ -85,6 +85,8 @@ public class RootConfig {
 	private String naverClientSecret;
 	@Value("${BASE_URL:}")
 	private String baseUrl;
+	@Value("${JWT_SECRET}")
+	private String jwtSecret;
 
 	// CODEF 환경 변수
 	@Value("${CODEF_CLIENT_ID:}")

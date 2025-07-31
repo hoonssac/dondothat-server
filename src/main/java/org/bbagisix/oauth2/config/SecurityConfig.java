@@ -1,5 +1,6 @@
 package org.bbagisix.oauth2.config;
 
+import org.bbagisix.oauth2.handler.CustomSuccessHandler;
 import org.bbagisix.oauth2.service.CustomOAuth2UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -18,18 +19,17 @@ import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClient
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 
+import lombok.RequiredArgsConstructor;
+
 @Configuration
 @EnableWebSecurity
 @PropertySource("classpath:application.properties")
+@RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	private final CustomOAuth2UserService customOAuth2UserService;
-	private final Environment environment; // Properties 값 읽기용
-
-	public SecurityConfig(CustomOAuth2UserService customOAuth2UserService, Environment environment) {
-		this.customOAuth2UserService = customOAuth2UserService;
-		this.environment = environment;
-	}
+	private final Environment environment;
+	private final CustomSuccessHandler customSuccessHandler;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -59,7 +59,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.userInfoEndpoint()
 				.userService(customOAuth2UserService)
 			.and()
-			.defaultSuccessUrl("/oauth2-success", true)
+			.successHandler(customSuccessHandler)
 			.failureUrl("/oauth2-login?error");
 	}
 
