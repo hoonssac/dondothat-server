@@ -1,7 +1,9 @@
-package org.bbagisix.user.config;
+package org.bbagisix.config;
 
+import org.bbagisix.user.filter.JWTFilter;
 import org.bbagisix.user.handler.CustomSuccessHandler;
 import org.bbagisix.user.service.CustomOAuth2UserService;
+import org.bbagisix.user.util.JWTUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -17,6 +19,7 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,6 +32,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private final CustomOAuth2UserService customOAuth2UserService;
 	private final Environment environment;
 	private final CustomSuccessHandler customSuccessHandler;
+	private final JWTUtil jwtUtil;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -51,6 +55,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers("/", "/oauth2-login", "/oauth2-success", "/error", "/resources/**", 
 						"/oauth2/**", "/login/oauth2/**", "/debug/**").permitAll()
 			.anyRequest().authenticated();
+
+		http.addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
 		// OAuth2 로그인 설정 - 이것이 필터를 자동 등록해야 함
 		http.oauth2Login()
