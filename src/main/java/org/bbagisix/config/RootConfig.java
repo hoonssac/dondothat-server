@@ -64,13 +64,13 @@ public class RootConfig {
 	@Value("${REDIS_PORT:6379}")
 	private int redisPort;
 
-	@Value("${spring.mail.host}")
+	@Value("${SPRING_MAIL_HOST}")
 	private String mailHost;
-	@Value("${spring.mail.port}")
+	@Value("${SPRING_MAIL_PORT}")
 	private int mailPort;
-	@Value("${spring.mail.username}")
+	@Value("${SPRING_MAIL_USERNAME}")
 	private String mailUsername;
-	@Value("${spring.mail.password}")
+	@Value("${SPRING_MAIL_PASSWORD}")
 	private String mailPassword;
 
 	// OAuth 환경 변수
