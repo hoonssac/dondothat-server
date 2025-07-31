@@ -1,6 +1,5 @@
 package org.bbagisix.oauth2.config;
 
-import lombok.RequiredArgsConstructor;
 import org.bbagisix.oauth2.service.CustomOAuth2UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,8 +13,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
-import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
@@ -58,7 +55,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 		// OAuth2 로그인 설정 - 이것이 필터를 자동 등록해야 함
 		http.oauth2Login()
-			.clientRegistrationRepository(clientRegistrationRepository())
+			.clientRegistrationRepository(clientRegistrationRepository(environment))
 			.userInfoEndpoint()
 				.userService(customOAuth2UserService)
 			.and()
@@ -67,23 +64,22 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public ClientRegistrationRepository clientRegistrationRepository() {
+	public static ClientRegistrationRepository clientRegistrationRepository(Environment environment) {
 		return new InMemoryClientRegistrationRepository(
-			googleClientRegistration(),
-			naverClientRegistration()
+			googleClientRegistration(environment),
+			naverClientRegistration(environment)
 		);
 	}
 
 	@Bean
-	public OAuth2AuthorizedClientService authorizedClientService() {
-		return new InMemoryOAuth2AuthorizedClientService(clientRegistrationRepository());
+	public OAuth2AuthorizedClientService authorizedClientService(ClientRegistrationRepository clientRegistrationRepository) {
+		return new InMemoryOAuth2AuthorizedClientService(clientRegistrationRepository);
 	}
 
-	@Bean
-	public ClientRegistration googleClientRegistration() {
+	private static ClientRegistration googleClientRegistration(Environment environment) {
 		return ClientRegistration.withRegistrationId("google")
-			.clientId(environment.getProperty("spring.security.oauth2.client.registration.google.client-id"))
-			.clientSecret(environment.getProperty("spring.security.oauth2.client.registration.google.client-secret"))
+			.clientId(environment.getProperty("GOOGLE_CLIENT_ID"))
+			.clientSecret(environment.getProperty("GOOGLE_CLIENT_SECRET"))
 			.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 			.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
 			.redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
@@ -96,11 +92,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.build();
 	}
 
-	@Bean
-	public ClientRegistration naverClientRegistration() {
+	private static ClientRegistration naverClientRegistration(Environment environment) {
 		return ClientRegistration.withRegistrationId("naver")
-			.clientId(environment.getProperty("spring.security.oauth2.client.registration.naver.client-id"))
-			.clientSecret(environment.getProperty("spring.security.oauth2.client.registration.naver.client-secret"))
+			.clientId(environment.getProperty("NAVER_CLIENT_ID"))
+			.clientSecret(environment.getProperty("NAVER_CLIENT_SECRET"))
 			.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
 			.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
 			.redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
