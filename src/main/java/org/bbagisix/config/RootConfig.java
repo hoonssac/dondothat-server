@@ -24,6 +24,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.web.client.RestTemplate;
 
 import javax.sql.DataSource;
 import javax.validation.Valid;
@@ -197,5 +198,10 @@ public class RootConfig {
 		DataSourceTransactionManager manager = new DataSourceTransactionManager(dataSource());
 
 		return manager;
+	}
+
+	@Bean
+	public RestTemplate restTemplate() {
+		return new RestTemplate();
 	}
 }
