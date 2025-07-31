@@ -1,6 +1,8 @@
 package org.bbagisix.user.handler;
 
 import lombok.RequiredArgsConstructor;
+
+import org.bbagisix.user.dto.CustomOAuth2User;
 import org.bbagisix.user.util.JwtUtil;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -22,7 +24,12 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        String token = jwtUtil.createToken(authentication.getName(), "ROLE_USER", 60 * 60 * 1000L); // 1시간 유효
+        CustomOAuth2User oAuth2User = (CustomOAuth2User)authentication.getPrincipal();
+        String email = oAuth2User.getEmail();
+        String role = oAuth2User.getRole();
+        String name = oAuth2User.getName();
+        String nickname = oAuth2User.getNickname();
+        String token = jwtUtil.createToken(email, role, name, nickname, 60 * 60 * 1000L); // 1시간 유효
 
         String targetUrl = UriComponentsBuilder.fromUriString(
                 "http://localhost:5173/oauth-redirect")
@@ -31,13 +38,6 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
             .encode(StandardCharsets.UTF_8)
             .toUriString();
 
-        // Cookie cookie = new Cookie("jwt", token);
-        // cookie.setPath("/");
-        // cookie.setHttpOnly(true);
-        // cookie.setSecure(request.isSecure());
-        // response.addCookie(cookie);
-
-        // getRedirectStrategy().sendRedirect(request, response, "/oauth2-success");
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 }

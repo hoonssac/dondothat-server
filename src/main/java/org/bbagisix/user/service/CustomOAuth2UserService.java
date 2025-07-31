@@ -43,15 +43,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             log.error("지원하지 않는 소셜 로그인입니다.");
             return null;
         }
-        String socialId = oAuth2Response.getProvider() + " " + oAuth2Response.getProviderId();
-        UserVO userVO = userMapper.findBySocialId(socialId);
+        String socialId = oAuth2Response.getProvider() + "_" + oAuth2Response.getProviderId();
+        String email = oAuth2Response.getEmail();
+        UserVO userVO = userMapper.findByEmail(email);
 
         if (userVO == null) {
             log.info("신규 사용자입니다. DB에 저장합니다.");
             userVO = UserVO.builder()
                 .name(oAuth2Response.getName())
                 .socialId(socialId)
-                .email(oAuth2Response.getEmail())
+                .email(email)
                 .nickname("기본 닉네임")
                 .socialId(socialId)
                 .role("ROLE_USER")

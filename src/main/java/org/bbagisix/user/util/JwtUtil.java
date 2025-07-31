@@ -20,17 +20,20 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public String createToken(String subject, String role, long expirationTime) {
+    public String createToken(String email, String role, String name, String nickname, long expirationTime) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationTime);
 
         return Jwts.builder()
-                .setSubject(subject)
-                .claim("role", role)
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-                .compact();
+            .setSubject(email)
+            .claim("role", role)
+            .claim("name", name)
+            .claim("email", email)
+            .claim("nickname", nickname)
+            .setIssuedAt(now)
+            .setExpiration(expiryDate)
+            .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+            .compact();
     }
 
     private Claims getClaims(String token) {
@@ -43,6 +46,14 @@ public class JwtUtil {
 
     public String getRole(String token) {
         return getClaims(token).get("role", String.class);
+    }
+
+    public String getEmail(String token) {
+        return getClaims(token).get("email", String.class);
+    }
+
+    public String getNickname(String token) {
+        return getClaims(token).get("nickname", String.class);
     }
 
     public boolean isExpired(String token) {

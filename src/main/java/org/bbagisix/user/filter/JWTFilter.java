@@ -45,10 +45,14 @@ public class JWTFilter extends OncePerRequestFilter {
 
 		String name = jwtUtil.getName(token);
 		String role = jwtUtil.getRole(token);
+		String email = jwtUtil.getEmail(token);
+		String nickname = jwtUtil.getNickname(token);
 
 		UserDTO userDTO = new UserDTO();
 		userDTO.setName(name);
 		userDTO.setRole(role);
+		userDTO.setNickname(nickname);
+		userDTO.setEmail(email);
 
 		CustomOAuth2User customOAuth2User = new CustomOAuth2User(userDTO);
 

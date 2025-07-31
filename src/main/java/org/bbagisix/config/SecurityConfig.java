@@ -111,7 +111,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.authorizationUri("https://accounts.google.com/o/oauth2/auth")
 			.tokenUri("https://oauth2.googleapis.com/token")
 			.userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
-			.userNameAttributeName("sub")
+			.userNameAttributeName("email")
 			.clientName("Google")
 			.build();
 	}
