@@ -32,7 +32,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         String token = jwtUtil.createToken(email, role, name, nickname, 60 * 60 * 1000L); // 1시간 유효
 
         String targetUrl = UriComponentsBuilder.fromUriString(
-                "http://localhost:5173/oauth-redirect")
+                "https://dondothat.netlify.app/oauth-redirect")
             .queryParam("token", token)
             .build()
             .encode(StandardCharsets.UTF_8)
