@@ -43,8 +43,11 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
             }
             String token = jwtUtil.createToken(email, role, name, nickname, 60 * 60 * 1000L); // 1시간 유효
             logger.info("CustomOAuth2SuccessHandler: JWT 토큰 생성 완료. 토큰 길이: {}", token.length());
-            String targetUrl = UriComponentsBuilder.fromUriString(
-                    "https://dondothat.netlify.app/oauth-redirect")
+            
+            // 동적 리다이렉트 URL 결정
+            String redirectUrl = determineRedirectUrl(request);
+            
+            String targetUrl = UriComponentsBuilder.fromUriString(redirectUrl)
                 .queryParam("token", token)
                 .build()
                 .encode(StandardCharsets.UTF_8)
@@ -55,6 +58,48 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         } catch (Exception e) {
             logger.error("CustomOAuth2SuccessHandler: 인증 성공 처리 중 예외 발생", e);
             response.sendRedirect("/error?message=authentication_success_error");
+        }
+    }
+    
+    private String determineRedirectUrl(HttpServletRequest request) {
+        // 1. URL 파라미터에서 직접 확인
+        String redirectUri = request.getParameter("redirect_uri");
+        if (redirectUri != null) {
+            logger.info("URL 파라미터에서 리다이렉트 URI 발견: {}", redirectUri);
+            return redirectUri;
+        }
+        
+        // 2. 세션에서 원본 URL 확인 (가장 정확)
+        String originalUrl = (String) request.getSession().getAttribute("OAUTH2_ORIGINAL_URL");
+        if (originalUrl != null) {
+            logger.info("세션에서 원본 URL 발견: {}", originalUrl);
+            return getRedirectUrlFromOrigin(originalUrl);
+        } else {
+            logger.info("세션에 OAUTH2_ORIGINAL_URL이 없습니다.");
+        }
+        
+        // 3. Referer 헤더에서 확인
+        String referer = request.getHeader("Referer");
+        if (referer != null) {
+            logger.info("Referer 헤더에서 URL 확인: {}", referer);
+            return getRedirectUrlFromOrigin(referer);
+        } else {
+            logger.info("Referer 헤더가 없습니다.");
+        }
+        
+        // 4. 기본값 (로컬 개발)
+        logger.info("기본 리다이렉트 URL 사용");
+        return "http://localhost:5173/oauth-redirect";
+    }
+    
+    private String getRedirectUrlFromOrigin(String originUrl) {
+        if (originUrl.contains("localhost:5173") || originUrl.contains("127.0.0.1:5173")) {
+            return "http://localhost:5173/oauth-redirect";
+        } else if (originUrl.contains("netlify.app")) {
+            return "https://dondothat.netlify.app/oauth-redirect";
+        } else {
+            // 기본값 (로컬 개발 우선)
+            return "http://localhost:5173/oauth-redirect";
         }
     }
 }
