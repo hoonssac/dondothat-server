@@ -1,6 +1,5 @@
 package org.bbagisix.config;
 
-import org.bbagisix.oauth2.config.SecurityConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;

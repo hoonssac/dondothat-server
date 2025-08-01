@@ -1,4 +1,4 @@
-package org.bbagisix.oauth2.dto;
+package org.bbagisix.user.dto;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,10 +34,18 @@ public class CustomOAuth2User implements OAuth2User {
 
 	@Override
 	public String getName() {
-		return userDTO.getName();
+		return userDTO.getEmail();
 	}
 
-	public String getUsername() {
-		return userDTO.getUsername();
+	public String getRole() {
+		return userDTO.getRole();
+	}
+
+	public String getEmail() {
+		return userDTO.getEmail();
+	}
+
+	public String getNickname() {
+		return userDTO.getNickname();
 	}
 }

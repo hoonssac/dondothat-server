@@ -24,6 +24,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.web.client.RestTemplate;
 
 import javax.sql.DataSource;
 import javax.validation.Valid;
@@ -84,6 +85,8 @@ public class RootConfig {
 	private String naverClientSecret;
 	@Value("${BASE_URL:}")
 	private String baseUrl;
+	@Value("${JWT_SECRET}")
+	private String jwtSecret;
 
 	// CODEF 환경 변수
 	@Value("${CODEF_CLIENT_ID:}")
@@ -197,5 +200,10 @@ public class RootConfig {
 		DataSourceTransactionManager manager = new DataSourceTransactionManager(dataSource());
 
 		return manager;
+	}
+
+	@Bean
+	public RestTemplate restTemplate() {
+		return new RestTemplate();
 	}
 }
