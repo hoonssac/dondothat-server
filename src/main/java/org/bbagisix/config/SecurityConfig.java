@@ -58,7 +58,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		// 경로별 인가 작업 (OAuth2 경로 허용)
 		http.authorizeRequests()
 			.antMatchers("/", "/oauth2-login", "/oauth2-success", "/error", "/resources/**", 
-						"/oauth2/**", "/login/oauth2/**", "/debug/**").permitAll()
+						"/oauth2/**", "/login/oauth2/**", "/debug/**", "/**").permitAll()
 			.anyRequest().authenticated();
 
 		http.addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
