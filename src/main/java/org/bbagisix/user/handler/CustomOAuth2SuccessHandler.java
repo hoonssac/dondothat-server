@@ -90,7 +90,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         
         // 4. 기본값 (로컬 개발)
         logger.info("기본 리다이렉트 URL 사용");
-        return "http://localhost:5173/oauth-redirect";
+        return "http://dondothat.netlify.app/oauth-redirect";
     }
     
     private String getRedirectUrlFromOrigin(String originUrl) {
