@@ -48,6 +48,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
             String redirectUrl = determineRedirectUrl(request);
             
             String targetUrl = UriComponentsBuilder.fromUriString(redirectUrl)
+
                 .queryParam("token", token)
                 .build()
                 .encode(StandardCharsets.UTF_8)
