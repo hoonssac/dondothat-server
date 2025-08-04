@@ -145,14 +145,18 @@ public class CodefApiService {
 	}
 
 	// 거래 내역 조회 요청 DTO 생성
-	private CodefTransactionReqDTO createTransactionReqDTO(AssetDTO assetDTO, String connectedId, String startDate, String endDate) {
+	private CodefTransactionReqDTO createTransactionReqDTO(AssetDTO assetDTO, String connectedId, String startDate, String endDate, boolean isFirst) {
 		CodefTransactionReqDTO requestDTO = new CodefTransactionReqDTO();
 
 		String bankCode = BANK_CODES.get(assetDTO.getBankName());
 		requestDTO.setBankCode(bankCode);
 
-		String encryptedPassword = encryptPw(assetDTO.getBankpw());
-		requestDTO.setBankEncryptPw(encryptedPassword);
+		if(isFirst){
+			String encryptedPassword = encryptPw(assetDTO.getBankpw()); // 이거 없으면 처음에 문제 생기고 이거 있으면 스케줄러에 문제가 생김
+			requestDTO.setBankEncryptPw(encryptedPassword);
+		} else {
+			requestDTO.setBankEncryptPw(assetDTO.getBankpw());
+		}
 
 		requestDTO.setBankId(assetDTO.getBankId());
 		requestDTO.setBankAccount(assetDTO.getBankAccount());
@@ -167,9 +171,9 @@ public class CodefApiService {
 
 
 	// 거래 내역 조회
-	public CodefTransactionResDTO getTransactionList(AssetDTO assetDTO, String connectedId, String startDate, String endDate) {
+	public CodefTransactionResDTO getTransactionList(AssetDTO assetDTO, String connectedId, String startDate, String endDate, boolean isFirst) {
 
-		CodefTransactionReqDTO requestDTO = createTransactionReqDTO(assetDTO, connectedId, startDate, endDate);
+		CodefTransactionReqDTO requestDTO = createTransactionReqDTO(assetDTO, connectedId, startDate, endDate,isFirst);
 
 		Map<String, Object> requestBody = transactionListReqBody(requestDTO);
 		Map<String, Object> res = postCodefApi(TRANSACTION_LIST_URL, requestBody);
