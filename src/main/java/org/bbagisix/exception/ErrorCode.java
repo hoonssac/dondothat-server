@@ -32,6 +32,8 @@ public enum ErrorCode {
 	CHALLENGE_ID_REQUIRED(HttpStatus.BAD_REQUEST, "CH002", "챌린지 ID는 필수입니다."),
 	CHALLENGE_ENDED(HttpStatus.BAD_REQUEST, "CH003", "종료된 챌린지입니다."),
 	CHALLENGE_ACCESS_DENIED(HttpStatus.FORBIDDEN, "CH004", "해당 챌린지에 참여할 권한이 없습니다."),
+	ALREADY_JOINED_CHALLENGE(HttpStatus.CONFLICT, "CH005", "이미 챌린지에 참여중입니다."),
+	CHALLENGE_NOT_JOINED(HttpStatus.BAD_REQUEST, "CH006","사용자 정보와 일치하는 챌린지가 없습니다"),
 
 	// 데이터베이스 관련 에러
 	DATA_ACCESS_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "D001", "일시적인 오류가 발생했습니다."),

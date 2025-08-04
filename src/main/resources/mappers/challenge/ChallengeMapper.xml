@@ -6,7 +6,7 @@
 <mapper namespace="org.bbagisix.challenge.mapper.ChallengeMapper">
 
     <!-- 1. 챌린지 ID로 단일 챌린지 조회 -->
-    <select id="findByChallengeId" parameterType="long" resultType="org.bbagisix.challenge.domain.ChallengeVO">
+    <select id="findByChallengeId" resultType="org.bbagisix.challenge.domain.ChallengeVO">
         SELECT
             challenge_id,
             category_id,
@@ -26,5 +26,53 @@
               AND user_id = #{userId}
         )
     </select>
+
+    <!-- 3. 유저가 어떤 챌린지든 참여 중인지 확인 -->
+    <select id="hasActiveChallenge" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM user_challenge
+            WHERE user_id = #{userId}
+              AND status = 'ongoing'
+        )
+    </select>
+
+    <!-- 4. 사용자 존재 여부 확인 -->
+    <select id="existsUser" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM user
+            WHERE user_id = #{userId}
+        )
+    </select>
+
+    <!-- 5. 챌린지 참여 -->
+    <insert id="joinChallenge">
+        INSERT INTO user_challenge (
+            user_id,
+            challenge_id,
+            status,
+            period,
+            progress,
+            start_date,
+            end_date
+        ) VALUES (
+                     #{userId},
+                     #{challengeId},
+                     'ongoing',
+                     30,
+                     0,
+                     NOW(),
+                     DATE_ADD(NOW(), INTERVAL 30 DAY)
+                 )
+    </insert>
+
+    <!-- 6. 챌린지 탈퇴 -->
+    <delete id="leaveChallenge">
+        DELETE FROM user_challenge
+        WHERE challenge_id = #{challengeId}
+          AND user_id = #{userId}
+    </delete>
+
 
 </mapper>
