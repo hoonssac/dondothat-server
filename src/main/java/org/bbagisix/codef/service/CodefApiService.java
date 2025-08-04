@@ -152,7 +152,7 @@ public class CodefApiService {
 		requestDTO.setBankCode(bankCode);
 
 		if(isFirst){
-			String encryptedPassword = encryptPw(assetDTO.getBankpw()); // 이거 없으면 처음에 문제 생기고 이거 있으면 스케줄러에 문제가 생김
+			String encryptedPassword = encryptPw(assetDTO.getBankpw());
 			requestDTO.setBankEncryptPw(encryptedPassword);
 		} else {
 			requestDTO.setBankEncryptPw(assetDTO.getBankpw());
