@@ -42,6 +42,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		
+		// CORS 설정 적용
+		http.cors();
+		
 		// csrf disable
 		http.csrf().disable();
 
@@ -51,19 +54,27 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		// HTTP basic 인증 방식 disable
 		http.httpBasic().disable();
 
-		// 세션 설정 (OAuth2에서는 세션 필요)
+		// 세션 설정 - JWT 기반이므로 STATELESS
 		http.sessionManagement()
-			.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
+			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-		// 경로별 인가 작업 (OAuth2 경로 허용)
+		// 경로별 인가 작업
 		http.authorizeRequests()
-			.antMatchers("/", "/oauth2-login", "/oauth2-success", "/error", "/resources/**", 
-						"/oauth2/**", "/login/oauth2/**", "/debug/**").permitAll()
+			// 정적 리소스 허용
+			.antMatchers("/", "/error", "/resources/**", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
+			// OAuth2 관련 경로 허용
+			.antMatchers("/oauth2-login", "/oauth2-success", "/oauth2/**", "/login/oauth2/**").permitAll()
+			// API 회원가입/로그인 경로 허용
+			.antMatchers("/api/user/signup", "/api/user/login", "/api/user/send-verification", 
+						"/api/user/check-email", "/api/user/check-nickname").permitAll()
+			// 디버그 경로 허용 (개발용)
+			.antMatchers("/debug/**").permitAll()
+			// 나머지는 인증 필요 (닉네임 변경, /me 등)
 			.anyRequest().authenticated();
 
 		http.addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
-		// OAuth2 로그인 설정 - 이것이 필터를 자동 등록해야 함
+		// OAuth2 로그인 설정
 		http.oauth2Login()
 			.clientRegistrationRepository(clientRegistrationRepository(environment))
 			.userInfoEndpoint()
@@ -88,7 +99,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "https://dondothat.netlify.app", "http://dondothat.duckdns.org:8080"));
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(Arrays.asList("*"));
-		configuration.setAllowCredentials(true);
+		configuration.setAllowCredentials(true); // 쿠키 전송 허용
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration); // 모든 경로에 대해 위 설정 적용

@@ -11,6 +11,7 @@ public interface UserMapper {
 	int insertUser(UserVO user);
 
 	// 조회 메서드
+	UserVO findByUserId(@Param("userId") Long userId);
 	UserVO selectUserByEmail(@Param("email") String email);
 	UserVO selectUserById(@Param("userId") Long userId);
 	UserVO findByName(@Param("name") String name);
@@ -19,4 +20,7 @@ public interface UserMapper {
 
 	// 이메일 중복 체크
 	int countByEmail(@Param("email") String email);
+
+	// 닉네임 업데이트
+	int updateNickname(@Param("userId") Long userId, @Param("nickname") String nickname);
 }

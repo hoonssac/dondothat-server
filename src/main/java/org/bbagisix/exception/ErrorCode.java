@@ -25,6 +25,7 @@ public enum ErrorCode {
 	INVALID_VERIFICATION_CODE(HttpStatus.BAD_REQUEST, "E003", "인증코드가 올바르지 않습니다."),
 	VERIFICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST, "E004", "인증코드가 만료되었습니다."),
 	EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "E001", "이메일 발송에 실패했습니다."),
+	SOCIAL_NOT_FOUND(HttpStatus.NOT_FOUND, "E005", "지원하지 않는 소셜 로그인입니다."),
 
 	// 챌린지 관련 에러
 	CHALLENGE_NOT_FOUND(HttpStatus.NOT_FOUND, "CH001", "챌린지를 찾을 수 없습니다."),
@@ -41,6 +42,13 @@ public enum ErrorCode {
 	WEBSOCKET_CONNECTION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "W001", "채팅 연결에 실패했습니다."),
 	WEBSOCKET_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "W002", "메시지 전송에 실패했습니다."),
 	SESSION_EXPIRED(HttpStatus.UNAUTHORIZED, "W003", "세션이 만료되었습니다. 다시 연결해주세요."),
+
+	// 소비내역 관련 에러
+	EXPENSE_NOT_FOUND(HttpStatus.NOT_FOUND, "EX001", "소비내역을 찾을 수 없습니다."),
+	EXPENSE_ACCESS_DENIED(HttpStatus.FORBIDDEN, "EX002", "소비내역에 대한 접근 권한이 없습니다."),
+	EXPENSE_CREATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "EX003", "소비내역 생성에 실패했습니다."),
+	EXPENSE_UPDATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "EX004", "소비내역 수정에 실패했습니다."),
+	EXPENSE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "EX005", "소비내역 삭제에 실패했습니다."),
 
 	// LLM 관련 에러
 	LLM_CLASSIFY_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "L001", "카테고리 분류에 실패했습니다."),

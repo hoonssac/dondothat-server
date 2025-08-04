@@ -3,12 +3,14 @@ package org.bbagisix.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.bbagisix.exception.BusinessException;
+import org.bbagisix.exception.ErrorCode;
 import org.bbagisix.user.dto.CustomOAuth2User;
-import org.bbagisix.user.dto.UserDTO;
 import org.bbagisix.user.dto.GoogleResponse;
 import org.bbagisix.user.dto.NaverResponse;
 import org.bbagisix.user.dto.OAuth2Response;
 import org.bbagisix.user.domain.UserVO;
+import org.bbagisix.user.dto.UserResponse;
 import org.bbagisix.user.mapper.UserMapper;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -25,8 +27,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        log.info("OAuth2 로그인, DB 조회 및 가입 처리 시작");
-        
         // 기본 OAuth2UserService로 사용자 정보 가져오기
         OAuth2User oAuth2User = super.loadUser(userRequest);
         System.out.println(oAuth2User);
@@ -40,8 +40,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         } else if (registrationId.equals("google")) {
             oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
         } else {
-            log.error("지원하지 않는 소셜 로그인입니다.");
-            return null;
+            throw new BusinessException(ErrorCode.SOCIAL_NOT_FOUND);
         }
         String socialId = oAuth2Response.getProvider() + "_" + oAuth2Response.getProviderId();
         String email = oAuth2Response.getEmail();
@@ -63,12 +62,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             log.info("기존 사용자입니다.");
         }
 
-        UserDTO userDTO = new UserDTO();
-        userDTO.setName(userVO.getName());
-        userDTO.setNickname(userVO.getNickname());
-        userDTO.setRole(userVO.getRole());
-        userDTO.setEmail(userVO.getEmail());
+        UserResponse userResponse = UserResponse.builder()
+            .name(userVO.getName())
+            .nickname(userVO.getNickname())
+            .role(userVO.getRole())
+            .email(userVO.getEmail())
+            .assetConnected(false)
+            .build();
 
-        return new CustomOAuth2User(userDTO);
+        return new CustomOAuth2User(userResponse);
     }
 }
