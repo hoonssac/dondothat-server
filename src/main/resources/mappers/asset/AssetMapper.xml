@@ -111,4 +111,43 @@
         </foreach>
     </insert>
 
+    <!-- 모든 main 계좌 조회 -->
+    <select id="selectAllMainAssets" resultType="org.bbagisix.asset.domain.AssetVO">
+        SELECT
+            asset_id,
+            user_id,
+            asset_name,
+            bank_name,
+            bank_account,
+            bank_id,
+            bank_pw,
+            connected_id,
+            balance,
+            created_at,
+            status
+        FROM user_asset
+        WHERE status = 'main'
+          AND connected_id IS NOT NULL
+        ORDER BY user_id, created_at
+    </select>
+
+    <!-- 계좌 잔액 업데이트 -->
+    <update id="updateAssetBalance">
+        UPDATE user_asset
+        SET balance = #{balance},
+            updated_at = NOW()
+        WHERE asset_id = #{assetId}
+    </update>
+
+    <!--  중복 거래내역 개수 조회 -->
+    <select id="countDuplicateTransaction" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM expenditure
+        WHERE user_id = #{userId}
+          AND asset_id = #{assetId}
+          AND amount = #{amount}
+          AND description = #{description}
+          AND DATE_FORMAT(expenditure_date, '%Y-%m-%d %H:%i') = DATE_FORMAT(#{expenditureDate}, '%Y-%m-%d %H:%i')
+    </select>
+
 </mapper>
