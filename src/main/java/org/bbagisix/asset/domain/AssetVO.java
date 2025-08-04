@@ -21,4 +21,5 @@ public class AssetVO {
 	private String bankId;
 	private String bankPw;
 	private String connectedId;
+	private String status; // main, sub
 }

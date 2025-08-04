@@ -26,6 +26,7 @@
 
         <result property="balance" column="balance"/>
         <result property="createdAt" column="created_at"/>
+        <result property="status" column="status"/>
     </resultMap>
 
     <insert id="insertUserAsset" parameterType="org.bbagisix.asset.domain.AssetVO">
@@ -38,7 +39,9 @@
             bank_pw,
             connected_id,
             balance,
-            created_at
+            created_at,
+            status
+
         ) VALUES (
                      #{userId},
                      #{assetName},
@@ -48,11 +51,12 @@
                      #{bankPw, typeHandler=org.bbagisix.asset.encryption.AESEncryptedTypeHandler},
                      #{connectedId, typeHandler=org.bbagisix.asset.encryption.AESEncryptedTypeHandler},
                      #{balance},
-                     NOW()
+                     NOW(),
+                     #{status}
                  )
     </insert>
 
-    <select id="selectAssetByUserId" resultMap="AssetResultMap">
+    <select id="selectAssetByUserIdAndStatus" resultMap="AssetResultMap">
         select
             asset_id,
             user_id,
@@ -63,14 +67,17 @@
             bank_pw,
             connected_id,
             balance,
-            created_at
+            created_at,
+            status
         from user_asset
         where user_id = #{userId}
+          AND status = #{status}
     </select>
 
-    <delete id="deleteUserAssetByUserId">
+    <delete id="deleteUserAssetByUserIdAndStatus">
         delete from user_asset
         where user_id = #{userId}
+        AND status = #{status}
     </delete>
 
     <!-- expense 쪽에 넣어야 할 것   -->

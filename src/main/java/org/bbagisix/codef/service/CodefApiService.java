@@ -186,7 +186,7 @@ public class CodefApiService {
 	public boolean deleteConnectedId(Long userId) {
 
 		// 사용자 계좌 정보 조회
-		AssetVO assetVO = assetMapper.selectAssetByUserId(userId);
+		AssetVO assetVO = assetMapper.selectAssetByUserIdAndStatus(userId,"main");
 		if (assetVO == null) {
 			throw new BusinessException(ErrorCode.ASSET_NOT_FOUND);
 		}
