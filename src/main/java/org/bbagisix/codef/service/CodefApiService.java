@@ -163,7 +163,7 @@ public class CodefApiService {
 		requestDTO.setConnectedId(connectedId);
 		requestDTO.setStartDate(startDate);
 		requestDTO.setEndDate(endDate);
-		requestDTO.setOrderBy("0");
+		requestDTO.setOrderBy("1");
 
 		return requestDTO;
 	}
