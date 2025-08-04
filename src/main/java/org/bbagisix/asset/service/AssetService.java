@@ -76,8 +76,9 @@ public class AssetService {
 		String startStr = start.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
 		// 거래 내역 조회
-		CodefTransactionResDTO reqDTO = codefApiService.getTransactionList(assetDTO, connectedId, startStr, todayStr);
+		CodefTransactionResDTO reqDTO = codefApiService.getTransactionList(assetDTO, connectedId, startStr, todayStr,true);
 		if (reqDTO == null) {
+			log.error("❌ Codef API 응답이 null - 사용자ID: {}", userId);
 			throw new BusinessException(ErrorCode.TRANSACTION_FAIL, "외부 은행 API에서 거래내역을 조회하지 못했습니다.");
 		}
 
@@ -145,7 +146,8 @@ public class AssetService {
 		assetVO.setUserId(userId);
 		if(reqDTO == null){
 			assetVO.setBalance(0L);
-			assetVO.setAssetName(assetDTO.getBankName() + "계좌");
+			String assetName = assetDTO.getBankName() + " 계좌";
+			assetVO.setAssetName(assetName);
 			assetVO.setConnectedId(null);
 		} else {
 			assetVO.setAssetName(reqDTO.getResAccountName());
