@@ -197,7 +197,7 @@ public class AssetService {
 	}
 
 	// 거래 내역을 ExpenseVO 리스트로 변환
-	private List<ExpenseVO> toExpenseVOList(Long assetId, Long userId, CodefTransactionResDTO responseDTO) {
+	public List<ExpenseVO> toExpenseVOList(Long assetId, Long userId, CodefTransactionResDTO responseDTO) {
 		List<ExpenseVO> expenses = new ArrayList<>();
 
 		if (responseDTO.getResTrHistoryList() != null) {
@@ -234,7 +234,7 @@ public class AssetService {
 	}
 
 	// 금액 문자열을 Long으로 변환
-	private Long amountToLong(String amountStr){
+	public Long amountToLong(String amountStr){
 		if(amountStr == null || amountStr.trim().isEmpty()){
 			return 0L;
 		}
