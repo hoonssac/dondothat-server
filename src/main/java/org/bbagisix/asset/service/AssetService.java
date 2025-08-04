@@ -13,12 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
@@ -219,11 +221,11 @@ public class AssetService {
 
 				expenseVO.setDescription(item.getResAccountDesc3());
 
-				Timestamp expenditureTimestamp = parseTransactionDateTime(
+				Date expenditureDate = parseTransactionDateTime(
 					item.getResAccountTrDate(),
 					item.getResAccountTrTime()
 				);
-				expenseVO.setExpenditureDate(expenditureTimestamp);
+				expenseVO.setExpenditureDate(expenditureDate);
 
 				expenses.add(expenseVO);
 			}
@@ -245,7 +247,7 @@ public class AssetService {
 	}
 
 	// 거래 일시 파싱
-	private Timestamp parseTransactionDateTime(String dateStr, String timeStr) {
+	private Date parseTransactionDateTime(String dateStr, String timeStr) {
 
 		LocalDate date = parseTransactionDate(dateStr);
 		if (date == null) {
@@ -256,7 +258,7 @@ public class AssetService {
 
 		LocalDateTime dateTime = LocalDateTime.of(date, time);
 
-		return Timestamp.valueOf(dateTime);
+		return Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
 	}
 
 	// 거래 날짜 파싱

@@ -8,8 +8,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
-import java.sql.Timestamp;
 
 import org.bbagisix.codef.domain.CodefAccessTokenVO;
 import org.bbagisix.codef.mapper.CodefAccessTokenMapper;
@@ -104,7 +104,7 @@ public class CodefAccessTokenService {
 		// VO 생성
 		CodefAccessTokenVO vo = new CodefAccessTokenVO();
 		vo.setAccessToken(accessToken);
-		vo.setExpiresAt(new Timestamp(expiresTime));
+		vo.setExpiresAt(new Date(expiresTime));
 
 		// DB 저장 (기존 토큰이 있으면 업데이트, 없으면 삽입)
 		CodefAccessTokenVO curToken = codefAccessTokenMapper.getCurrentToken();
