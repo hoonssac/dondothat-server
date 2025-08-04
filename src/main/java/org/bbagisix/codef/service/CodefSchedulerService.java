@@ -1,6 +1,7 @@
 package org.bbagisix.codef.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,18 +35,23 @@ public class CodefSchedulerService {
 
 	private static final Long TBC = 14L; // 카테고리 id : TBC 미지정
 	private static final Long INCOME = 13L; // 카테고리 id : 수입
+
 	@Autowired
 	private AssetService assetService;
 
 	// 10분마다 실행 (cron: 초 분 시 일 월 요일)
-	@Scheduled(cron = "0 */1 * * * *")
+	@Scheduled(cron = "0 */10 * * * *")
 	@Transactional
 	public void syncAllMainAssetsTransactions(){
+		LocalDateTime now = LocalDateTime.now();
+
+		log.info("✅ Scheduler start" + now);
 		// 모든 main 계좌 조회
 		List<AssetVO> mainAssets = assetMapper.selectAllMainAssets();
 
 		if(mainAssets.isEmpty()){
 			log.info("동기화할 main 계좌가 없습니다.");
+			return;
 		}
 
 		int successCount = 0;
@@ -59,9 +65,8 @@ public class CodefSchedulerService {
 			} catch (Exception e) {
 				failCount++;
 			}
-
 		}
-
+		log.info("Scheduler finish - success: {}, fail: {}", successCount, failCount);
 	}
 	// 단일 계좌의 거래내역 동기화
 	private void syncAssetTransactions(AssetVO asset){
@@ -76,22 +81,23 @@ public class CodefSchedulerService {
 		String yesterdayStr = yesterday.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
 		// 거래내역 조회
-		CodefTransactionResDTO transactionResDTO = codefApiService.getTransactionList(assetDTO,asset.getConnectedId(),yesterdayStr,todayStr);
+		log.info(" 👉 [ user ID : {} ] Codef API start...", asset.getUserId());
+		CodefTransactionResDTO transactionResDTO = codefApiService.getTransactionList(assetDTO,asset.getConnectedId(),yesterdayStr,todayStr,false);
 
 		if(transactionResDTO == null || transactionResDTO.getResTrHistoryList() == null){
-			log.warn("거래내역 없음");
+			log.warn("API 응답이 null입니다");
 			return;
 		}
 		// 계좌 잔액 업데이트
 		updateAssetBalance(asset, transactionResDTO);
+		log.info(" 👉 [ user ID : {} ] update new balance... ", asset.getUserId());
 
 		// 새로운 거래내역만 필터링하여 저장
 		List<ExpenseVO> newTransactions = filterNewTransactions(asset,transactionResDTO);
 
 		if(!newTransactions.isEmpty()){
 			int insertedCount = assetMapper.insertExpenses(newTransactions);
-		} else{
-			log.info("새로운 거래내역이 없습니다 - 사용자ID: {}", asset.getUserId());
+			log.info(" 👉 [ user ID : {} ] update new transactions... : {} ", asset.getUserId(), newTransactions.size());
 		}
 	}
 
