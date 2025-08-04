@@ -24,7 +24,7 @@ public interface AssetMapper {
 	List<AssetVO> selectAllMainAssets();
 
 	// 계좌 잔액 업데이트
-	void updateAssetBalance(Long assetId, Long newBalance);
+	void updateAssetBalance(@Param("assetId") Long assetId, @Param("newBalance") Long newBalance);
 
 	// 중복 거래내역 개수 조회
 	int countDuplicateTransaction(
