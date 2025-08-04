@@ -23,6 +23,9 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -45,6 +48,7 @@ import java.util.regex.Pattern;
 			Controller.class, ControllerAdvice.class})
 	}
 )
+@EnableScheduling
 public class RootConfig {
 	private static final Logger log = LogManager.getLogger(RootConfig.class);
 	@Value("${jdbc.driver}")
@@ -215,5 +219,16 @@ public class RootConfig {
 	@Bean
 	public RestTemplate restTemplate() {
 		return new RestTemplate();
+	}
+
+	@Bean
+	public TaskScheduler taskScheduler(){
+		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+		scheduler.setPoolSize(2);
+		scheduler.setThreadNamePrefix("scheduler-");
+		scheduler.setWaitForTasksToCompleteOnShutdown(true);
+		scheduler.setAwaitTerminationSeconds(20);
+		scheduler.initialize();
+		return scheduler;
 	}
 }
