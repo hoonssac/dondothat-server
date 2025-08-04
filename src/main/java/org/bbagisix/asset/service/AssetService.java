@@ -47,14 +47,14 @@ public class AssetService {
 	// 1. 계좌 연동 + 3개월 소비내역 저장
 	// POST /api/assets/connect
 	@Transactional
-	public void connectAsset(Long userId, AssetDTO assetDTO){
+	public void connectMainAsset(Long userId, AssetDTO assetDTO){
 		// 정보 누락
 		if (assetDTO.getBankpw() == null || assetDTO.getBankId() == null || assetDTO.getBankAccount() == null) {
 			throw new BusinessException(ErrorCode.ASSET_FAIL, "필수 계좌 정보가 누락되었습니다.");
 		}
 
 		// 이미 연결된 계좌 확인
-		AssetVO existingAsset = assetMapper.selectAssetByUserId(userId);
+		AssetVO existingAsset = assetMapper.selectAssetByUserIdAndStatus(userId,"main");
 		if (existingAsset != null) {
 			throw new BusinessException(ErrorCode.ASSET_ALREADY_EXISTS);
 		}
@@ -80,32 +80,57 @@ public class AssetService {
 		}
 
 		// db 저장
-		AssetVO assetVO = createUserAssetVO(userId, assetDTO, connectedId, reqDTO);
-		Long assetId = insertUserAsset(assetVO);
+		AssetVO assetVO = createUserAssetVO(userId, assetDTO, connectedId, reqDTO, "main");
+		Long assetId = insertUserAsset(assetVO, "main");
 
 		saveTransactionHistory(assetId, userId, reqDTO);
 
 	}
 
+	// 1-2. 서브 계좌 입력
+	// 이건 그냥 db에 저장하는 것임
+	public void connectSubAsset (Long userId, AssetDTO assetDTO){
+		// 정보 누락
+		if (assetDTO.getBankpw() == null || assetDTO.getBankId() == null || assetDTO.getBankAccount() == null) {
+			throw new BusinessException(ErrorCode.ASSET_FAIL, "필수 계좌 정보가 누락되었습니다.");
+		}
+
+		// 이미 연결된 계좌 확인
+		AssetVO existingAsset = assetMapper.selectAssetByUserIdAndStatus(userId,"sub");
+		if (existingAsset != null) {
+			throw new BusinessException(ErrorCode.ASSET_ALREADY_EXISTS);
+		}
+
+		// db 저장
+		AssetVO assetVO = createUserAssetVO(userId, assetDTO, null, null, "sub");
+		Long assetId = insertUserAsset(assetVO,"sub");
+	}
+
+
 
 	// 2. 계좌 삭제
-	public void deleteAsset(Long userId) {
-		AssetVO asset = assetMapper.selectAssetByUserId(userId);
+	public void deleteMainAsset(Long userId, String status) {
+		AssetVO asset = assetMapper.selectAssetByUserIdAndStatus(userId,status);
 		if (asset == null) {
 			throw new BusinessException(ErrorCode.ASSET_NOT_FOUND);
 		}
 
-		// 1 Codef API 연결 해제
-		boolean codefDeleted = codefApiService.deleteConnectedId(userId);
-		if (!codefDeleted) {
-			throw new BusinessException(ErrorCode.CODEF_FAIL, "Codef API 연결 해제에 실패했습니다.");
+		// 1 main 계좌인 경우에만 Codef API 연결 해제
+		if ("main".equals(status)) {
+
+			// Codef API 연결해제
+			boolean codefDeleted = codefApiService.deleteConnectedId(userId);
+			if (!codefDeleted) {
+				throw new BusinessException(ErrorCode.CODEF_FAIL, "Codef API 연결 해제에 실패했습니다.");
+			}
+
+			// main 계좌의 거래내역 삭제
+			int deletedExpenses = assetMapper.deleteExpensesByUserId(userId);
+			log.info("삭제된 거래내역 수: {}", deletedExpenses);
 		}
 
-		// 2 관련 거래내역 삭제
-		int deletedExpenses = assetMapper.deleteExpensesByUserId(userId);
-
-		// 3 계좌 정보 삭제
-		int deletedAssets = assetMapper.deleteUserAssetByUserId(userId);
+		// 2 계좌 정보 삭제
+		int deletedAssets = assetMapper.deleteUserAssetByUserIdAndStatus(userId, status); // status param
 		if (deletedAssets == 0) {
 			throw new BusinessException(ErrorCode.ASSET_FAIL, "계좌 정보 삭제에 실패했습니다.");
 		}
@@ -113,33 +138,40 @@ public class AssetService {
 	}
 
 	// AssetVO 생성
-	private AssetVO createUserAssetVO(Long userId, AssetDTO assetDTO, String connectedId, CodefTransactionResDTO reqDTO){
+	private AssetVO createUserAssetVO(Long userId, AssetDTO assetDTO, String connectedId, CodefTransactionResDTO reqDTO, String status){
 		AssetVO assetVO = new AssetVO();
 		assetVO.setUserId(userId);
-		assetVO.setAssetName(reqDTO.getResAccountName());
+		if(reqDTO == null){
+			assetVO.setBalance(0L);
+			assetVO.setAssetName(assetDTO.getBankName() + "계좌");
+			assetVO.setConnectedId(null);
+		} else {
+			assetVO.setAssetName(reqDTO.getResAccountName());
+			assetVO.setConnectedId(connectedId);
+			if (reqDTO.getResAccountBalance() != null) {
+				Long balance = amountToLong(reqDTO.getResAccountBalance());
+				assetVO.setBalance(balance);
+			} else {
+				assetVO.setBalance(0L);
+			}
+
+		}
 		assetVO.setBankName(assetDTO.getBankName());
 		assetVO.setBankAccount(assetDTO.getBankAccount());
 		assetVO.setBankId(assetDTO.getBankId());
 		String encryptedPassword = codefApiService.encryptPw(assetDTO.getBankpw());
 		assetVO.setBankPw(encryptedPassword);
-		assetVO.setConnectedId(connectedId);
-
-		if (reqDTO.getResAccountBalance() != null) {
-			Long balance = amountToLong(reqDTO.getResAccountBalance());
-			assetVO.setBalance(balance);
-		} else {
-			assetVO.setBalance(0L);
-		}
+		assetVO.setStatus(status);
 
 		return assetVO;
 	}
 
 	// 계좌 정보 DB 저장
-	private Long insertUserAsset(AssetVO assetVO) {
+	private Long insertUserAsset(AssetVO assetVO, String status) {
 		// 들어가기 전에 암호화!
 		assetMapper.insertUserAsset(assetVO);
 
-		AssetVO insertedAsset = assetMapper.selectAssetByUserId(assetVO.getUserId());
+		AssetVO insertedAsset = assetMapper.selectAssetByUserIdAndStatus(assetVO.getUserId(),status);
 		if (insertedAsset == null || insertedAsset.getAssetId() == null) {
 			throw new BusinessException(ErrorCode.ASSET_FAIL, "계좌 정보 저장에 실패했습니다.");
 		}
