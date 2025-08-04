@@ -80,7 +80,6 @@
         AND status = #{status}
     </delete>
 
-    <!-- expense 쪽에 넣어야 할 것   -->
     <delete id="deleteExpensesByUserId">
         DELETE FROM expenditure
         WHERE asset_id IN (
@@ -112,7 +111,7 @@
     </insert>
 
     <!-- 모든 main 계좌 조회 -->
-    <select id="selectAllMainAssets" resultType="org.bbagisix.asset.domain.AssetVO">
+    <select id="selectAllMainAssets" resultMap="AssetResultMap">
         SELECT
             asset_id,
             user_id,
@@ -134,8 +133,7 @@
     <!-- 계좌 잔액 업데이트 -->
     <update id="updateAssetBalance">
         UPDATE user_asset
-        SET balance = #{balance},
-            updated_at = NOW()
+        SET balance = #{newBalance}
         WHERE asset_id = #{assetId}
     </update>
 
