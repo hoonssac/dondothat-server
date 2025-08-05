@@ -22,7 +22,6 @@ import org.bbagisix.codef.dto.CodefTransactionReqDTO;
 import org.bbagisix.codef.dto.CodefTransactionResDTO;
 import org.bbagisix.exception.BusinessException;
 import org.bbagisix.exception.ErrorCode;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -43,14 +42,11 @@ public class CodefApiService {
 	@Value("${CODEF_PUBLIC_KEY:}")
 	private String publicKey;
 
-	@Autowired(required = false)
-	private CodefAccessTokenService accessTokenService;
+	private final CodefAccessTokenService accessTokenService;
 
-	@Autowired
-	private EncryptionUtil encryptionUtil;
+	private final EncryptionUtil encryptionUtil;
 
-	@Autowired
-	private AssetMapper assetMapper;
+	private final AssetMapper assetMapper;
 
 	private static final String CONNECTED_ID_URL = "https://development.codef.io/v1/account/create";
 	private static final String TRANSACTION_LIST_URL = "https://development.codef.io/v1/kr/bank/p/account/transaction-list";
@@ -145,21 +141,25 @@ public class CodefApiService {
 	}
 
 	// 거래 내역 조회 요청 DTO 생성
-	private CodefTransactionReqDTO createTransactionReqDTO(AssetDTO assetDTO, String connectedId, String startDate, String endDate) {
+	private CodefTransactionReqDTO createTransactionReqDTO(AssetDTO assetDTO, String connectedId, String startDate, String endDate, boolean isFirst) {
 		CodefTransactionReqDTO requestDTO = new CodefTransactionReqDTO();
 
 		String bankCode = BANK_CODES.get(assetDTO.getBankName());
 		requestDTO.setBankCode(bankCode);
 
-		String encryptedPassword = encryptPw(assetDTO.getBankpw());
-		requestDTO.setBankEncryptPw(encryptedPassword);
+		if(isFirst){
+			String encryptedPassword = encryptPw(assetDTO.getBankpw());
+			requestDTO.setBankEncryptPw(encryptedPassword);
+		} else {
+			requestDTO.setBankEncryptPw(assetDTO.getBankpw());
+		}
 
 		requestDTO.setBankId(assetDTO.getBankId());
 		requestDTO.setBankAccount(assetDTO.getBankAccount());
 		requestDTO.setConnectedId(connectedId);
 		requestDTO.setStartDate(startDate);
 		requestDTO.setEndDate(endDate);
-		requestDTO.setOrderBy("0");
+		requestDTO.setOrderBy("1");
 
 		return requestDTO;
 	}
@@ -167,9 +167,9 @@ public class CodefApiService {
 
 
 	// 거래 내역 조회
-	public CodefTransactionResDTO getTransactionList(AssetDTO assetDTO, String connectedId, String startDate, String endDate) {
+	public CodefTransactionResDTO getTransactionList(AssetDTO assetDTO, String connectedId, String startDate, String endDate, boolean isFirst) {
 
-		CodefTransactionReqDTO requestDTO = createTransactionReqDTO(assetDTO, connectedId, startDate, endDate);
+		CodefTransactionReqDTO requestDTO = createTransactionReqDTO(assetDTO, connectedId, startDate, endDate,isFirst);
 
 		Map<String, Object> requestBody = transactionListReqBody(requestDTO);
 		Map<String, Object> res = postCodefApi(TRANSACTION_LIST_URL, requestBody);
@@ -186,7 +186,7 @@ public class CodefApiService {
 	public boolean deleteConnectedId(Long userId) {
 
 		// 사용자 계좌 정보 조회
-		AssetVO assetVO = assetMapper.selectAssetByUserId(userId);
+		AssetVO assetVO = assetMapper.selectAssetByUserIdAndStatus(userId,"main");
 		if (assetVO == null) {
 			throw new BusinessException(ErrorCode.ASSET_NOT_FOUND);
 		}

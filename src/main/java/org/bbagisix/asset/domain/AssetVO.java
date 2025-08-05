@@ -1,6 +1,6 @@
 package org.bbagisix.asset.domain;
 
-import java.sql.Timestamp;
+import java.util.Date;
 
 import lombok.*;
 
@@ -16,9 +16,10 @@ public class AssetVO {
 	private String assetName;
 	private Long balance;
 	private String bankName;
-	private Timestamp createdAt;
+	private Date createdAt;
 	private String bankAccount;
 	private String bankId;
 	private String bankPw;
 	private String connectedId;
+	private String status; // main, sub
 }

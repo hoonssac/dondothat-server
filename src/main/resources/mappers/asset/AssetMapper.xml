@@ -26,6 +26,7 @@
 
         <result property="balance" column="balance"/>
         <result property="createdAt" column="created_at"/>
+        <result property="status" column="status"/>
     </resultMap>
 
     <insert id="insertUserAsset" parameterType="org.bbagisix.asset.domain.AssetVO">
@@ -38,7 +39,9 @@
             bank_pw,
             connected_id,
             balance,
-            created_at
+            created_at,
+            status
+
         ) VALUES (
                      #{userId},
                      #{assetName},
@@ -48,11 +51,12 @@
                      #{bankPw, typeHandler=org.bbagisix.asset.encryption.AESEncryptedTypeHandler},
                      #{connectedId, typeHandler=org.bbagisix.asset.encryption.AESEncryptedTypeHandler},
                      #{balance},
-                     NOW()
+                     NOW(),
+                     #{status}
                  )
     </insert>
 
-    <select id="selectAssetByUserId" resultMap="AssetResultMap">
+    <select id="selectAssetByUserIdAndStatus" resultMap="AssetResultMap">
         select
             asset_id,
             user_id,
@@ -63,17 +67,19 @@
             bank_pw,
             connected_id,
             balance,
-            created_at
+            created_at,
+            status
         from user_asset
         where user_id = #{userId}
+          AND status = #{status}
     </select>
 
-    <delete id="deleteUserAssetByUserId">
+    <delete id="deleteUserAssetByUserIdAndStatus">
         delete from user_asset
         where user_id = #{userId}
+        AND status = #{status}
     </delete>
 
-    <!-- expense 쪽에 넣어야 할 것   -->
     <delete id="deleteExpensesByUserId">
         DELETE FROM expenditure
         WHERE asset_id IN (
@@ -103,5 +109,43 @@
             )
         </foreach>
     </insert>
+
+    <!-- 모든 main 계좌 조회 -->
+    <select id="selectAllMainAssets" resultMap="AssetResultMap">
+        SELECT
+            asset_id,
+            user_id,
+            asset_name,
+            bank_name,
+            bank_account,
+            bank_id,
+            bank_pw,
+            connected_id,
+            balance,
+            created_at,
+            status
+        FROM user_asset
+        WHERE status = 'main'
+          AND connected_id IS NOT NULL
+        ORDER BY user_id, created_at
+    </select>
+
+    <!-- 계좌 잔액 업데이트 -->
+    <update id="updateAssetBalance">
+        UPDATE user_asset
+        SET balance = #{newBalance}
+        WHERE asset_id = #{assetId}
+    </update>
+
+    <!--  중복 거래내역 개수 조회 -->
+    <select id="countDuplicateTransaction" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM expenditure
+        WHERE user_id = #{userId}
+          AND asset_id = #{assetId}
+          AND amount = #{amount}
+          AND description = #{description}
+          AND DATE_FORMAT(expenditure_date, '%Y-%m-%d %H:%i') = DATE_FORMAT(#{expenditureDate}, '%Y-%m-%d %H:%i')
+    </select>
 
 </mapper>
