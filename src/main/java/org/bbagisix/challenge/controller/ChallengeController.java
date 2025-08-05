@@ -5,11 +5,10 @@ import org.bbagisix.challenge.dto.ChallengeDTO;
 import org.bbagisix.challenge.service.ChallengeService;
 import org.bbagisix.exception.BusinessException;
 import org.bbagisix.exception.ErrorCode;
-import org.bbagisix.user.util.JwtUtil;
+import org.bbagisix.user.dto.CustomOAuth2User;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/challenges")
@@ -17,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 public class ChallengeController {
 
 	private final ChallengeService challengeService;
-	private final JwtUtil jwtUtil;
 
 	// 1. challengeId가 없는 경우: /api/challenges 또는 /api/challenges/
 	@GetMapping
@@ -36,11 +34,11 @@ public class ChallengeController {
 		}
 	}
 
-	// 3. 챌린지 참여 API (JWT 토큰 기반)
+	// 3. 챌린지 참여 API (ExpenseController 패턴 적용)
 	@PostMapping("/{challengeId}/join")
 	public ResponseEntity<String> joinChallenge(
 		@PathVariable String challengeId,
-		HttpServletRequest request) {
+		Authentication authentication) {
 
 		// challengeId 유효성 검사
 		if (challengeId == null || challengeId.trim().isEmpty() || challengeId.equalsIgnoreCase("null")) {
@@ -50,10 +48,10 @@ public class ChallengeController {
 		try {
 			Long parsedChallengeId = Long.parseLong(challengeId);
 
-			// JWT 토큰에서 사용자 ID 추출
-			Long userId = getCurrentUserId(request);
+			// ExpenseController와 동일한 패턴으로 사용자 정보 추출
+			CustomOAuth2User currentUser = (CustomOAuth2User) authentication.getPrincipal();
 
-			challengeService.joinChallenge(parsedChallengeId, userId);
+			challengeService.joinChallenge(parsedChallengeId, currentUser.getUserId());
 			return ResponseEntity.ok("챌린지 참여가 완료되었습니다.");
 
 		} catch (NumberFormatException e) {
@@ -61,11 +59,11 @@ public class ChallengeController {
 		}
 	}
 
-	// 4. 챌린지 탈퇴 API (JWT 토큰 기반)
+	// 4. 챌린지 탈퇴 API (ExpenseController 패턴 적용)
 	@DeleteMapping("/{challengeId}/leave")
 	public ResponseEntity<String> leaveChallenge(
 		@PathVariable String challengeId,
-		HttpServletRequest request) {
+		Authentication authentication) {
 
 		// challengeId 유효성 검사
 		if (challengeId == null || challengeId.trim().isEmpty() || challengeId.equalsIgnoreCase("null")) {
@@ -75,47 +73,14 @@ public class ChallengeController {
 		try {
 			Long parsedChallengeId = Long.parseLong(challengeId);
 
-			// JWT 토큰에서 사용자 ID 추출
-			Long userId = getCurrentUserId(request);
+			// ExpenseController와 동일한 패턴으로 사용자 정보 추출
+			CustomOAuth2User currentUser = (CustomOAuth2User) authentication.getPrincipal();
 
-			challengeService.leaveChallenge(parsedChallengeId, userId);
+			challengeService.leaveChallenge(parsedChallengeId, currentUser.getUserId());
 			return ResponseEntity.ok("챌린지 탈퇴가 완료되었습니다.");
 
 		} catch (NumberFormatException e) {
 			throw new BusinessException(ErrorCode.CHALLENGE_ID_REQUIRED);
 		}
-	}
-
-	/**
-	 * JWT 토큰에서 현재 로그인한 사용자 ID 추출
-	 */
-	private Long getCurrentUserId(HttpServletRequest request) {
-		String token = extractTokenFromRequest(request);
-		if (token == null || token.isEmpty()) {
-			throw new BusinessException(ErrorCode.USER_UNAUTHORIZED);
-		}
-
-		try {
-			// JWT 토큰이 만료되었는지 확인
-			if (jwtUtil.isExpired(token)) {
-				throw new BusinessException(ErrorCode.USER_UNAUTHORIZED);
-			}
-
-			// JWT에서 사용자 ID 추출
-			return jwtUtil.getUserId(token);
-		} catch (Exception e) {
-			throw new BusinessException(ErrorCode.USER_UNAUTHORIZED);
-		}
-	}
-
-	/**
-	 * Authorization 헤더에서 Bearer 토큰 추출
-	 */
-	private String extractTokenFromRequest(HttpServletRequest request) {
-		String bearerToken = request.getHeader("Authorization");
-		if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-			return bearerToken.substring(7);
-		}
-		return null;
 	}
 }
