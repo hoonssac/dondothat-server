@@ -75,7 +75,6 @@ public class AssetController {
 			"message", message + " 성공적으로 삭제되었습니다."
 		));
 	}
-
 	// 사용자 ID 추출 및 검증
 	private Long getUserId(Authentication authentication) {
 		if (authentication == null || authentication.getPrincipal() == null) {

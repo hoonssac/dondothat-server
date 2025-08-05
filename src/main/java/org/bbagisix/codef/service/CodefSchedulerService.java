@@ -16,7 +16,6 @@ import org.bbagisix.expense.mapper.ExpenseMapper;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -33,7 +32,6 @@ public class CodefSchedulerService {
 
 	private static final Long TBC = 14L; // 카테고리 id : TBC 미지정
 	private static final Long INCOME = 13L; // 카테고리 id : 수입
-
 	private final AssetService assetService;
 
 	// 10분마다 실행 (cron: 초 분 시 일 월 요일)
