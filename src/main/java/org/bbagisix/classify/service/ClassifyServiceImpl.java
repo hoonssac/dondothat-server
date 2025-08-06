@@ -2,6 +2,7 @@ package org.bbagisix.classify.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.bbagisix.exception.BusinessException;
@@ -19,14 +20,16 @@ import lombok.extern.log4j.Log4j2;
 public class ClassifyServiceImpl implements ClassifyService {
 
 	private final RestTemplate restTemplate = new RestTemplate();
-	private static final String URL = "http://llm-server:8000/classify";
+	private static final String URL = "http://dondothat.duckdns.org:8000/classify";
 
 	@Override
 	public List<ExpenseVO> classify(List<ExpenseVO> expenses) {
 
+		AtomicLong counter = new AtomicLong(1);
+
 		List<Map<String, Object>> exps = expenses.stream()
 			.map(e -> Map.<String, Object>of(
-				"expenditure_id", e.getExpenditureId(),
+				"expenditure_id", counter.getAndIncrement(),
 				"description", e.getDescription()
 			))
 			.collect(Collectors.toList());
@@ -51,6 +54,7 @@ public class ClassifyServiceImpl implements ClassifyService {
 			Long categoryId = idToCategory.get(expense.getExpenditureId());
 			if (categoryId != null) {
 				expense.setCategoryId(categoryId);
+				expense.setExpenditureId(null);
 			}
 		}
 
