@@ -1,6 +1,10 @@
 package org.bbagisix.challenge.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
+
 import org.bbagisix.analytics.service.AnalyticsService;
 import org.bbagisix.category.dto.CategoryDTO;
 import org.bbagisix.challenge.domain.ChallengeVO;
@@ -9,9 +13,6 @@ import org.bbagisix.challenge.mapper.ChallengeMapper;
 import org.bbagisix.exception.BusinessException;
 import org.bbagisix.exception.ErrorCode;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -44,12 +45,7 @@ public class ChallengeService {
 		}
 
 		// AnalyticsService에서 LLM 기반 추천 카테고리 3개 조회
-		List<CategoryDTO> topCategories = analyticsService.getTopCategories(userId);
-
-		// 추천받은 카테고리 ID 리스트 추출
-		List<Long> categoryIds = topCategories.stream()
-			.map(CategoryDTO::getCategoryId)
-			.collect(Collectors.toList());
+		List<Long> categoryIds = analyticsService.getTopCategories(userId);
 
 		// 추천 카테고리에 해당하는 챌린지들 조회
 		List<ChallengeVO> recommendedChallenges = challengeMapper.findChallengesByCategoryIds(categoryIds, userId);
@@ -58,37 +54,6 @@ public class ChallengeService {
 		return recommendedChallenges.stream()
 			.map(ChallengeDTO::from)
 			.collect(Collectors.toList());
-	}
-
-	public Integer getChallengeProgress(Long challengeId, Long userId) {
-		if (challengeId == null) {
-			throw new BusinessException(ErrorCode.CHALLENGE_ID_REQUIRED);
-		}
-
-		if (userId == null) {
-			throw new BusinessException(ErrorCode.USER_ID_REQUIRED);
-		}
-
-		// 사용자 존재 여부 확인
-		if (!challengeMapper.existsUser(userId)) {
-			throw new BusinessException(ErrorCode.USER_NOT_FOUND);
-		}
-
-		// 챌린지 존재 여부 확인
-		ChallengeVO challenge = challengeMapper.findByChallengeId(challengeId);
-		if (challenge == null) {
-			throw new BusinessException(ErrorCode.CHALLENGE_NOT_FOUND);
-		}
-
-		// 해당 챌린지에 참여하고 있는지 확인
-		if (!challengeMapper.existsUserChallenge(challengeId, userId)) {
-			throw new BusinessException(ErrorCode.CHALLENGE_NOT_JOINED);
-		}
-
-		// user_challenge 테이블에서 progress 값 조회
-		Integer progress = challengeMapper.getUserChallengeProgress(challengeId, userId);
-
-		return progress;
 	}
 
 	public void joinChallenge(Long challengeId, Long userId) {
