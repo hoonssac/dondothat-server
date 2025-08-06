@@ -6,8 +6,7 @@ import java.util.stream.Collectors;
 
 import org.bbagisix.exception.BusinessException;
 import org.bbagisix.exception.ErrorCode;
-import org.bbagisix.expense.dto.ExpenseDTO;
-import org.bbagisix.expense.service.ExpenseService;
+import org.bbagisix.expense.domain.ExpenseVO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -19,13 +18,12 @@ import lombok.extern.log4j.Log4j2;
 @RequiredArgsConstructor
 public class ClassifyServiceImpl implements ClassifyService {
 
-	private final ExpenseService expenseService;
 	private final RestTemplate restTemplate = new RestTemplate();
-	private static final String SINGLE_URL = "http://llm-server:8000/classify";
-	private static final String BATCH_URL = "http://llm-server:8000/classify_batch";
+	private static final String SINGLE_URL = "http://dondothat.duckdns.org:8000/classify";
+	private static final String BATCH_URL = "http://dondothat.duckdns.org:8000/classify_batch";
 
 	@Override
-	public void classify(ExpenseDTO expense) {
+	public ExpenseVO classify(ExpenseVO expense) {
 
 		Map<String, Object> payload = Map.of(
 			"expenditure_id", expense.getExpenditureId(),
@@ -40,12 +38,13 @@ public class ClassifyServiceImpl implements ClassifyService {
 
 		Long expenseId = ((Number)response.get("expenditure_id")).longValue();
 		Long categoryId = ((Number)response.get("category_id")).longValue();
+
 		expense.setCategoryId(categoryId);
-		expenseService.updateExpenseInternal(expenseId, expense);
+		return expense;
 	}
 
 	@Override
-	public void classifyBatch(List<ExpenseDTO> expenses) {
+	public List<ExpenseVO> classifyBatch(List<ExpenseVO> expenses) {
 
 		List<Map<String, Object>> exps = expenses.stream()
 			.map(e -> Map.<String, Object>of(
@@ -63,14 +62,20 @@ public class ClassifyServiceImpl implements ClassifyService {
 
 		List<Map<String, Object>> results = (List<Map<String, Object>>)response.get("results");
 
-		// 각 소비내역 업데이트
-		for (Map<String, Object> res : results) {
-			Long expenseId = ((Number)res.get("expenditure_id")).longValue();
-			Long categoryId = ((Number)res.get("category_id")).longValue();
+		Map<Long, Long> idToCategory = results.stream()
+			.collect(Collectors.toMap(
+				r -> ((Number)r.get("expenditure_id")).longValue(),
+				r -> ((Number)r.get("category_id")).longValue()
+			));
 
-			ExpenseDTO expense = expenseService.getExpenseByIdInternal(expenseId);
-			expense.setCategoryId(categoryId);
-			expenseService.updateExpenseInternal(expenseId, expense);
+		// 각 ExpenseVO에 categoryId 설정
+		for (ExpenseVO expense : expenses) {
+			Long categoryId = idToCategory.get(expense.getExpenditureId());
+			if (categoryId != null) {
+				expense.setCategoryId(categoryId);
+			}
 		}
+
+		return expenses;
 	}
 }
