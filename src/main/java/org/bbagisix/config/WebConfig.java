@@ -1,6 +1,5 @@
 package org.bbagisix.config;
 
-
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
@@ -19,11 +18,11 @@ public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitiali
 	final String LOCATION = "c:/upload";
 	final long MAX_FILE_SIZE = 1024 * 1024 * 10L;
 	final long MAX_REQUEST_SIZE = 1024 * 1024 * 20L;
-	final int FILE_SIZE_THRESHOLD = 1024 * 1024 * 5;;
+	final int FILE_SIZE_THRESHOLD = 1024 * 1024 * 5;
 
 	@Override
 	protected Class<?>[] getRootConfigClasses() {
-		return new Class[] {RootConfig.class};
+		return new Class[] {RootConfig.class, SecurityConfig.class};
 	}
 
 	@Override
@@ -40,11 +39,14 @@ public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitiali
 	// POST body 문자 인코딩 필터 설정 - UTF-8 설정
 	protected Filter[] getServletFilters() {
 		CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter();
-
 		characterEncodingFilter.setEncoding("UTF-8");
 		characterEncodingFilter.setForceEncoding(true);
 
-		return new Filter[] {characterEncodingFilter};
+		// Spring Security Filter
+		org.springframework.web.filter.DelegatingFilterProxy securityFilter = 
+			new org.springframework.web.filter.DelegatingFilterProxy("springSecurityFilterChain");
+		
+		return new Filter[] {characterEncodingFilter, securityFilter};
 	}
 
 	@Override
