@@ -1,18 +1,5 @@
 package org.bbagisix.asset.service;
 
-import org.bbagisix.asset.domain.AssetVO;
-import org.bbagisix.asset.dto.AssetDTO;
-import org.bbagisix.asset.mapper.AssetMapper;
-import org.bbagisix.codef.dto.CodefTransactionResDTO;
-import org.bbagisix.codef.service.CodefApiService;
-import org.bbagisix.exception.BusinessException;
-import org.bbagisix.exception.ErrorCode;
-import org.bbagisix.expense.domain.ExpenseVO;
-import org.bbagisix.expense.mapper.ExpenseMapper;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -21,6 +8,19 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import org.bbagisix.asset.domain.AssetVO;
+import org.bbagisix.asset.dto.AssetDTO;
+import org.bbagisix.asset.mapper.AssetMapper;
+import org.bbagisix.classify.service.ClassifyService;
+import org.bbagisix.codef.dto.CodefTransactionResDTO;
+import org.bbagisix.codef.service.CodefApiService;
+import org.bbagisix.exception.BusinessException;
+import org.bbagisix.exception.ErrorCode;
+import org.bbagisix.expense.domain.ExpenseVO;
+import org.bbagisix.expense.mapper.ExpenseMapper;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -34,26 +34,25 @@ public class AssetService {
 	private final AssetMapper assetMapper;
 
 	private final CodefApiService codefApiService;
+	private final ClassifyService classifyService;
 
 	private final ExpenseMapper expenseMapper;
-
 
 	private static final int MONTH = 3; // 처음 3개월 소비내역 조회
 	private static final Long TBC = 14L; // 📄 카테고리 id : TBC 미지정
 	private static final Long INCOME = 13L; // 📄 카테고리 id : 수입
 
-
 	// 1. 계좌 연동 + 3개월 소비내역 저장
 	// POST /api/assets/connect
 	@Transactional
-	public void connectMainAsset(Long userId, AssetDTO assetDTO){
+	public void connectMainAsset(Long userId, AssetDTO assetDTO) {
 		// 정보 누락
 		if (assetDTO.getBankpw() == null || assetDTO.getBankId() == null || assetDTO.getBankAccount() == null) {
 			throw new BusinessException(ErrorCode.ASSET_FAIL, "필수 계좌 정보가 누락되었습니다.");
 		}
 
 		// 이미 연결된 계좌 확인
-		AssetVO existingAsset = assetMapper.selectAssetByUserIdAndStatus(userId,"main");
+		AssetVO existingAsset = assetMapper.selectAssetByUserIdAndStatus(userId, "main");
 		if (existingAsset != null) {
 			throw new BusinessException(ErrorCode.ASSET_ALREADY_EXISTS);
 		}
@@ -73,7 +72,8 @@ public class AssetService {
 		String startStr = start.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
 		// 거래 내역 조회
-		CodefTransactionResDTO reqDTO = codefApiService.getTransactionList(assetDTO, connectedId, startStr, todayStr,true);
+		CodefTransactionResDTO reqDTO = codefApiService.getTransactionList(assetDTO, connectedId, startStr, todayStr,
+			true);
 		if (reqDTO == null) {
 			log.error("❌ Codef API 응답이 null - 사용자ID: {}", userId);
 			throw new BusinessException(ErrorCode.TRANSACTION_FAIL, "외부 은행 API에서 거래내역을 조회하지 못했습니다.");
@@ -89,28 +89,26 @@ public class AssetService {
 
 	// 1-2. 서브 계좌 입력
 	// 이건 그냥 db에 저장하는 것임
-	public void connectSubAsset (Long userId, AssetDTO assetDTO){
+	public void connectSubAsset(Long userId, AssetDTO assetDTO) {
 		// 정보 누락
 		if (assetDTO.getBankpw() == null || assetDTO.getBankId() == null || assetDTO.getBankAccount() == null) {
 			throw new BusinessException(ErrorCode.ASSET_FAIL, "필수 계좌 정보가 누락되었습니다.");
 		}
 
 		// 이미 연결된 계좌 확인
-		AssetVO existingAsset = assetMapper.selectAssetByUserIdAndStatus(userId,"sub");
+		AssetVO existingAsset = assetMapper.selectAssetByUserIdAndStatus(userId, "sub");
 		if (existingAsset != null) {
 			throw new BusinessException(ErrorCode.ASSET_ALREADY_EXISTS);
 		}
 
 		// db 저장
 		AssetVO assetVO = createUserAssetVO(userId, assetDTO, null, null, "sub");
-		Long assetId = insertUserAsset(assetVO,"sub");
+		Long assetId = insertUserAsset(assetVO, "sub");
 	}
-
-
 
 	// 2. 계좌 삭제
 	public void deleteMainAsset(Long userId, String status) {
-		AssetVO asset = assetMapper.selectAssetByUserIdAndStatus(userId,status);
+		AssetVO asset = assetMapper.selectAssetByUserIdAndStatus(userId, status);
 		if (asset == null) {
 			throw new BusinessException(ErrorCode.ASSET_NOT_FOUND);
 		}
@@ -138,10 +136,11 @@ public class AssetService {
 	}
 
 	// AssetVO 생성
-	private AssetVO createUserAssetVO(Long userId, AssetDTO assetDTO, String connectedId, CodefTransactionResDTO reqDTO, String status){
+	private AssetVO createUserAssetVO(Long userId, AssetDTO assetDTO, String connectedId, CodefTransactionResDTO reqDTO,
+		String status) {
 		AssetVO assetVO = new AssetVO();
 		assetVO.setUserId(userId);
-		if(reqDTO == null){
+		if (reqDTO == null) {
 			assetVO.setBalance(0L);
 			String assetName = assetDTO.getBankName() + " 계좌";
 			assetVO.setAssetName(assetName);
@@ -172,7 +171,7 @@ public class AssetService {
 		// 들어가기 전에 암호화!
 		assetMapper.insertUserAsset(assetVO);
 
-		AssetVO insertedAsset = assetMapper.selectAssetByUserIdAndStatus(assetVO.getUserId(),status);
+		AssetVO insertedAsset = assetMapper.selectAssetByUserIdAndStatus(assetVO.getUserId(), status);
 		if (insertedAsset == null || insertedAsset.getAssetId() == null) {
 			throw new BusinessException(ErrorCode.ASSET_FAIL, "계좌 정보 저장에 실패했습니다.");
 		}
@@ -180,17 +179,18 @@ public class AssetService {
 	}
 
 	// 거래 내역 저장
-	private void saveTransactionHistory(Long assetId, Long userId, CodefTransactionResDTO resDTO){
-		List<ExpenseVO> expenseVOList = toExpenseVOList(assetId,userId,resDTO);
+	private void saveTransactionHistory(Long assetId, Long userId, CodefTransactionResDTO resDTO) {
+		List<ExpenseVO> expenseVOList = toExpenseVOList(assetId, userId, resDTO);
 
-		if(!expenseVOList.isEmpty()){
+		if (!expenseVOList.isEmpty()) {
+			expenseVOList = classifyService.classify(expenseVOList);
 			int insertedCount = assetMapper.insertExpenses(expenseVOList);
 			if (insertedCount != expenseVOList.size()) {
 				throw new BusinessException(ErrorCode.TRANSACTION_FAIL,
 					"일부 거래내역 저장에 실패했습니다. 예상: " + expenseVOList.size() + ", 실제: " + insertedCount);
 			}
 
-		} else{
+		} else {
 			throw new BusinessException(ErrorCode.ASSET_FAIL);
 		}
 	}
@@ -233,8 +233,8 @@ public class AssetService {
 	}
 
 	// 금액 문자열을 Long으로 변환
-	public Long amountToLong(String amountStr){
-		if(amountStr == null || amountStr.trim().isEmpty()){
+	public Long amountToLong(String amountStr) {
+		if (amountStr == null || amountStr.trim().isEmpty()) {
 			return 0L;
 		}
 		try {
@@ -275,6 +275,7 @@ public class AssetService {
 		}
 		return null;
 	}
+
 	// 거래 시간 파싱
 	private LocalTime parseTransactionTime(String timeStr) {
 		if (timeStr != null && !timeStr.trim().isEmpty()) {
@@ -304,9 +305,5 @@ public class AssetService {
 		}
 		return LocalTime.of(0, 0, 0);
 	}
-
-
-
-
 
 }
