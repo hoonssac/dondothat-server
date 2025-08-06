@@ -2,10 +2,10 @@ package org.bbagisix.classify.service;
 
 import java.util.List;
 
-import org.bbagisix.expense.dto.ExpenseDTO;
+import org.bbagisix.expense.domain.ExpenseVO;
 
 public interface ClassifyService {
-	void classify(ExpenseDTO expense);
+	ExpenseVO classify(ExpenseVO expense);
 
-	void classifyBatch(List<ExpenseDTO> expense);
+	List<ExpenseVO> classifyBatch(List<ExpenseVO> expense);
 }
