@@ -19,32 +19,10 @@ import lombok.extern.log4j.Log4j2;
 public class ClassifyServiceImpl implements ClassifyService {
 
 	private final RestTemplate restTemplate = new RestTemplate();
-	private static final String SINGLE_URL = "http://dondothat.duckdns.org:8000/classify";
-	private static final String BATCH_URL = "http://dondothat.duckdns.org:8000/classify_batch";
+	private static final String URL = "http://dondothat.duckdns.org:8000/classify";
 
 	@Override
-	public ExpenseVO classify(ExpenseVO expense) {
-
-		Map<String, Object> payload = Map.of(
-			"expenditure_id", expense.getExpenditureId(),
-			"description", expense.getDescription()
-		);
-
-		Map<String, Object> response = restTemplate.postForObject(SINGLE_URL, payload, Map.class);
-
-		if (response == null || !response.containsKey("category_id") || !response.containsKey("expenditure_id")) {
-			throw new BusinessException(ErrorCode.LLM_CLASSIFY_ERROR);
-		}
-
-		Long expenseId = ((Number)response.get("expenditure_id")).longValue();
-		Long categoryId = ((Number)response.get("category_id")).longValue();
-
-		expense.setCategoryId(categoryId);
-		return expense;
-	}
-
-	@Override
-	public List<ExpenseVO> classifyBatch(List<ExpenseVO> expenses) {
+	public List<ExpenseVO> classify(List<ExpenseVO> expenses) {
 
 		List<Map<String, Object>> exps = expenses.stream()
 			.map(e -> Map.<String, Object>of(
@@ -55,7 +33,7 @@ public class ClassifyServiceImpl implements ClassifyService {
 
 		Map<String, Object> payload = Map.<String, Object>of("exps", exps);
 
-		Map<String, Object> response = restTemplate.postForObject(BATCH_URL, payload, Map.class);
+		Map<String, Object> response = restTemplate.postForObject(URL, payload, Map.class);
 		if (response == null || !response.containsKey("results")) {
 			throw new BusinessException(ErrorCode.LLM_CLASSIFY_ERROR);
 		}

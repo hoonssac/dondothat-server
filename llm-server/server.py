@@ -15,7 +15,7 @@ class Exp(BaseModel):
     expenditure_id: int
     description: str
 
-class ExpsBatch(BaseModel):
+class ExpsList(BaseModel):
     exps:List[Exp]
 
 class ExpForAnalytics(BaseModel):
@@ -60,7 +60,7 @@ def classify_category(desc):
     우아한형제들과 요기요만 1로 분류하세요.:
     '''
     response = client.chat.completions.create(
-        model="gpt-4.1-nano",
+        model="gpt-4o",
         messages=[{"role": "user", "content": prompt}],
         temperature=0
     )
@@ -71,27 +71,22 @@ async def classify_category_async(desc):
     # OpenAI 동기 호출을 스레드 풀로 감싸서 비동기처럼 동작
     return await loop.run_in_executor(None, lambda: classify_category(desc))
 
-# 단일 분류 API
+# 분류 API
 @app.post("/classify")
-async def classify(exp: Exp):
-    category = classify_category(exp.description)
-    return {"expenditure_id": exp.expenditure_id, "category_id": int(category)}
+async def classify(list: ExpsList):
 
-# 여러 개 한 번에 분류 (배치)
-@app.post("/classify_batch")
-async def classify_batch(batch: ExpsBatch):
-
-    tasks = [classify_category_async(e.description) for e in batch.exps]
+    tasks = [classify_category_async(e.description) for e in list.exps]
     categories = await asyncio.gather(*tasks)
     results = [
         {"expenditure_id": e.expenditure_id, "category_id": int(c)}
-        for e, c in zip(batch.exps, categories)
+        for e, c in zip(list.exps, categories)
     ]
     return {"results": results}
 
+# 분석 API
 @app.post("/analysis")
-async def analysis(batch: ExpsAnalytics):
-    simplified = [{"category_id": e.category_id, "amount": e.amount} for e in batch.exps]
+async def analysis(list: ExpsAnalytics):
+    simplified = [{"category_id": e.category_id, "amount": e.amount} for e in list.exps]
     prompt = f'''
     소비내역:{simplified}
     아래 조건을 기준으로 '과소비' 카테고리 상위 3개를 선정하세요:
