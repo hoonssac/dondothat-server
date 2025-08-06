@@ -25,8 +25,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 	private final ExpenseService expenseService;
 	private final CategoryService categoryService;
 	private final RestTemplate restTemplate = new RestTemplate();
-	private static final String URL = "http://llm-server:8000/analysis";
-	private static final String LOCAL_URL = "http://localhost:8000/analysis"; // 로컬 테스트용
+	private static final String URL = "http://dondothat.duckdns.org:8000/analysis";
 
 	@Override
 	public List<CategoryDTO> getTopCategories(Long userId) {
@@ -44,7 +43,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
 			Map<String, Object> payload = Map.of("exps", expsForAnalytics);
 
-			Map<String, Object> response = restTemplate.postForObject(LOCAL_URL, payload, Map.class);
+			Map<String, Object> response = restTemplate.postForObject(URL, payload, Map.class);
 			if (response == null || !response.containsKey("results")) {
 				throw new BusinessException(ErrorCode.LLM_ANALYTICS_ERROR);
 			}
