@@ -27,6 +27,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 	private final RestTemplate restTemplate = new RestTemplate();
 	private static final String URL = "http://llm-server:8000/analysis";
 
+
 	@Override
 	public List<CategoryDTO> getTopCategories(Long userId) {
 
