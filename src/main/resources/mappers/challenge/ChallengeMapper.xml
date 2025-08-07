@@ -7,64 +7,54 @@
 
     <!-- 1. 챌린지 ID로 단일 챌린지 조회 -->
     <select id="findByChallengeId" resultType="org.bbagisix.challenge.domain.ChallengeVO">
-        SELECT
-            challenge_id,
-            category_id,
-            title,
-            summary,
-            description
+        SELECT challenge_id,
+               category_id,
+               title,
+               summary,
+               description
         FROM challenge
         WHERE challenge_id = #{challengeId}
     </select>
 
     <!-- 2. 유저가 해당 챌린지에 참여 중인지 확인 -->
     <select id="existsUserChallenge" resultType="boolean">
-        SELECT EXISTS (
-            SELECT 1
-            FROM user_challenge
-            WHERE challenge_id = #{challengeId}
-              AND user_id = #{userId}
-        )
+        SELECT EXISTS (SELECT 1
+                       FROM user_challenge
+                       WHERE challenge_id = #{challengeId}
+                         AND user_id = #{userId})
     </select>
 
     <!-- 3. 유저가 어떤 챌린지든 참여 중인지 확인 -->
     <select id="hasActiveChallenge" resultType="boolean">
-        SELECT EXISTS (
-            SELECT 1
-            FROM user_challenge
-            WHERE user_id = #{userId}
-              AND status = 'ongoing'
-        )
+        SELECT EXISTS (SELECT 1
+                       FROM user_challenge
+                       WHERE user_id = #{userId}
+                         AND status = 'ongoing')
     </select>
 
     <!-- 4. 사용자 존재 여부 확인 -->
     <select id="existsUser" resultType="boolean">
-        SELECT EXISTS (
-            SELECT 1
-            FROM user
-            WHERE user_id = #{userId}
-        )
+        SELECT EXISTS (SELECT 1
+                       FROM user
+                       WHERE user_id = #{userId})
     </select>
 
     <!-- 5. 챌린지 참여 -->
     <insert id="joinChallenge">
-        INSERT INTO user_challenge (
-            user_id,
-            challenge_id,
-            status,
-            period,
-            progress,
-            start_date,
-            end_date
-        ) VALUES (
-                     #{userId},
-                     #{challengeId},
-                     'ongoing',
-                     30,
-                     0,
-                     NOW(),
-                     DATE_ADD(NOW(), INTERVAL 30 DAY)
-                 )
+        INSERT INTO user_challenge (user_id,
+                                    challenge_id,
+                                    status,
+                                    period,
+                                    progress,
+                                    start_date,
+                                    end_date)
+        VALUES (#{userId},
+                #{challengeId},
+                'ongoing',
+                30,
+                0,
+                NOW(),
+                DATE_ADD(NOW(), INTERVAL 30 DAY))
     </insert>
 
     <!-- 7. 추천 카테고리에 해당하는 챌린지들 조회 -->
@@ -93,18 +83,16 @@
 
     <!-- 8. 사용자 챌린지 진척도 조회 -->
     <select id="getChallengeProgress" resultType="org.bbagisix.challenge.dto.ChallengeProgressDTO">
-        SELECT
-            uc.challenge_id,
-            (SELECT c.title FROM challenge c WHERE c.challenge_id = uc.challenge_id) as title,
-            uc.period,
-            uc.status,
-            uc.progress,
-            uc.saving,
-            uc.is_active
+        SELECT uc.challenge_id,
+               (SELECT c.title FROM challenge c WHERE c.challenge_id = uc.challenge_id) as title,
+               uc.period,
+               uc.status,
+               uc.progress,
+               uc.saving,
+               uc.is_active
         FROM user_challenge uc
         WHERE uc.user_id = #{userId}
-          AND uc.is_active = true
-        LIMIT 1
+          AND uc.is_active = true LIMIT 1
     </select>
 
     <!--    진행중인 유저챌린지 조회-->
@@ -125,7 +113,8 @@
     <update id="updateChallenge" parameterType="org.bbagisix.challenge.domain.UserChallengeVO">
         update user_challenge
         set status=#{status},
-            progress=#{progress}
+            progress=#{progress},
+            end_date=#{endDate}
         where user_challenge_id = #{userChallengeId}
     </update>
 
