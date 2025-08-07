@@ -4,6 +4,7 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import org.bbagisix.challenge.dto.ChallengeDTO;
+import org.bbagisix.challenge.dto.ChallengeProgressDTO;
 import org.bbagisix.challenge.service.ChallengeService;
 import org.bbagisix.exception.BusinessException;
 import org.bbagisix.exception.ErrorCode;
@@ -45,15 +46,12 @@ public class ChallengeController {
 	}
 
 	// 2-2. 챌린지 진척도 조회 API (새로 추가)
-	@GetMapping("/{challengeId}/progress")
-	public ResponseEntity<Integer> getChallengeProgress(
-		@PathVariable Long challengeId,
-		Authentication authentication) {
-
+	// ChallengeController.java에 추가
+	@GetMapping("/progress")
+	public ResponseEntity<ChallengeProgressDTO> getChallengeProgress(Authentication authentication) {
 		CustomOAuth2User currentUser = (CustomOAuth2User) authentication.getPrincipal();
-		Integer progress = challengeService.getChallengeProgress(challengeId, currentUser.getUserId());
-		return ResponseEntity.ok(progress);
-
+		ChallengeProgressDTO result = challengeService.getChallengeProgress(currentUser.getUserId());
+		return ResponseEntity.ok(result);
 	}
 
 	// 3. 챌린지 참여 API (ExpenseController 패턴 적용)

@@ -9,6 +9,7 @@ import org.bbagisix.analytics.service.AnalyticsService;
 import org.bbagisix.category.dto.CategoryDTO;
 import org.bbagisix.challenge.domain.ChallengeVO;
 import org.bbagisix.challenge.dto.ChallengeDTO;
+import org.bbagisix.challenge.dto.ChallengeProgressDTO;
 import org.bbagisix.challenge.mapper.ChallengeMapper;
 import org.bbagisix.exception.BusinessException;
 import org.bbagisix.exception.ErrorCode;
@@ -56,11 +57,7 @@ public class ChallengeService {
 			.collect(Collectors.toList());
 	}
 
-	public Integer getChallengeProgress(Long challengeId, Long userId) {
-		if (challengeId == null) {
-			throw new BusinessException(ErrorCode.CHALLENGE_ID_REQUIRED);
-		}
-
+	public ChallengeProgressDTO getChallengeProgress(Long userId) {
 		if (userId == null) {
 			throw new BusinessException(ErrorCode.USER_ID_REQUIRED);
 		}
@@ -70,21 +67,7 @@ public class ChallengeService {
 			throw new BusinessException(ErrorCode.USER_NOT_FOUND);
 		}
 
-		// 챌린지 존재 여부 확인
-		ChallengeVO challenge = challengeMapper.findByChallengeId(challengeId);
-		if (challenge == null) {
-			throw new BusinessException(ErrorCode.CHALLENGE_NOT_FOUND);
-		}
-
-		// 해당 챌린지에 참여하고 있는지 확인
-		if (!challengeMapper.existsUserChallenge(challengeId, userId)) {
-			throw new BusinessException(ErrorCode.CHALLENGE_NOT_JOINED);
-		}
-
-		// user_challenge 테이블에서 progress 값 조회
-		Integer progress = challengeMapper.getUserChallengeProgress(challengeId, userId);
-
-		return progress;
+		return challengeMapper.getChallengeProgress(userId);
 	}
 
 	public void joinChallenge(Long challengeId, Long userId) {

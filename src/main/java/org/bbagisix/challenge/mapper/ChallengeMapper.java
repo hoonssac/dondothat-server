@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.bbagisix.challenge.domain.ChallengeVO;
+import org.bbagisix.challenge.dto.ChallengeProgressDTO;
 
 @Mapper
 public interface ChallengeMapper {
@@ -18,5 +19,5 @@ public interface ChallengeMapper {
 	List<ChallengeVO> findChallengesByCategoryIds(@Param("categoryIds") List<Long> categoryIds, @Param("userId") Long userId);
 
 	// 사용자 챌린지 진척도 조회
-	Integer getUserChallengeProgress(@Param("challengeId") Long challengeId, @Param("userId") Long userId);
+	ChallengeProgressDTO getChallengeProgress(@Param("userId") Long userId);
 }
