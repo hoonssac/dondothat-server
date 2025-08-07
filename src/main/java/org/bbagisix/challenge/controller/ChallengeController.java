@@ -2,7 +2,6 @@ package org.bbagisix.challenge.controller;
 
 import java.util.List;
 
-import lombok.RequiredArgsConstructor;
 import org.bbagisix.challenge.dto.ChallengeDTO;
 import org.bbagisix.challenge.dto.ChallengeProgressDTO;
 import org.bbagisix.challenge.service.ChallengeService;
@@ -11,7 +10,13 @@ import org.bbagisix.exception.ErrorCode;
 import org.bbagisix.user.dto.CustomOAuth2User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/challenges")
@@ -40,7 +45,7 @@ public class ChallengeController {
 	// 2-1. 추천 챌린지 3개 조회 API
 	@GetMapping("/recommendations")
 	public ResponseEntity<List<ChallengeDTO>> getRecommendedChallenges(Authentication authentication) {
-		CustomOAuth2User currentUser = (CustomOAuth2User) authentication.getPrincipal();
+		CustomOAuth2User currentUser = (CustomOAuth2User)authentication.getPrincipal();
 		List<ChallengeDTO> recommendedChallenges = challengeService.getRecommendedChallenges(currentUser.getUserId());
 		return ResponseEntity.ok(recommendedChallenges);
 	}
@@ -69,7 +74,7 @@ public class ChallengeController {
 			Long parsedChallengeId = Long.parseLong(challengeId);
 
 			// ExpenseController와 동일한 패턴으로 사용자 정보 추출
-			CustomOAuth2User currentUser = (CustomOAuth2User) authentication.getPrincipal();
+			CustomOAuth2User currentUser = (CustomOAuth2User)authentication.getPrincipal();
 
 			challengeService.joinChallenge(parsedChallengeId, currentUser.getUserId());
 			return ResponseEntity.ok("챌린지 참여가 완료되었습니다.");

@@ -1,25 +1,29 @@
 package org.bbagisix.challenge.service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
-
 import org.bbagisix.analytics.service.AnalyticsService;
-import org.bbagisix.category.dto.CategoryDTO;
 import org.bbagisix.challenge.domain.ChallengeVO;
+import org.bbagisix.challenge.domain.UserChallengeVO;
 import org.bbagisix.challenge.dto.ChallengeDTO;
 import org.bbagisix.challenge.dto.ChallengeProgressDTO;
 import org.bbagisix.challenge.mapper.ChallengeMapper;
 import org.bbagisix.exception.BusinessException;
 import org.bbagisix.exception.ErrorCode;
+import org.bbagisix.expense.mapper.ExpenseMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class ChallengeService {
 
 	private final ChallengeMapper challengeMapper;
+	private final ExpenseMapper expenseMapper;
 	private final AnalyticsService analyticsService;
 
 	public ChallengeDTO getChallengeById(Long challengeId) {
@@ -97,5 +101,32 @@ public class ChallengeService {
 
 		// 챌린지 참여
 		challengeMapper.joinChallenge(challengeId, userId);
+	}
+
+	// 챌린지 성공/실패 판단 및 진척도 계산
+	@Transactional
+	public void dailyCheck() {
+
+		List<UserChallengeVO> challenges = challengeMapper.getOngoingChallenges(); // ongoing인 챌린지 조회
+
+		for (UserChallengeVO c : challenges) {
+			Long challengeCtg = challengeMapper.getCategoryByChallengeId(c.getChallengeId()); // 해당 챌린지의 카테고리 아이디 조회
+			Long userId = c.getUserId();
+			List<Long> expenseCtg
+				= expenseMapper.getTodayExpenseCategories(userId); // 유저 소비내역의 카테고리 아이디 조회
+
+			if (expenseCtg.contains(challengeCtg)) { // 소비내역에 현재 챌린지의 카테고리가 포함된 경우 -> 실패
+				c.setStatus("failed");
+				c.setEndDate(new Date());
+			} else { // 유저 소비내역에 현재 챌린지의 카테고리가 포함되지 않은 경우 -> 하루 성공
+				c.setProgress(c.getProgress() + 1); // 진척도 +1
+				LocalDate endDate = c.getEndDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+				if (endDate.equals(LocalDate.now())) {  // 마지막 날인 경우 -> 최종 성공
+					c.setStatus("completed");
+				}
+			}
+			System.out.println("수정 후 상태: " + c.getStatus());
+			challengeMapper.updateChallenge(c);
+		}
 	}
 }
