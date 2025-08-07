@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.bbagisix.challenge.domain.ChallengeVO;
+import org.bbagisix.challenge.dto.ChallengeProgressDTO;
 
 @Mapper
 public interface ChallengeMapper {
@@ -13,6 +14,10 @@ public interface ChallengeMapper {
 	boolean existsUser(@Param("userId") Long userId);
 	boolean existsUserChallenge(@Param("challengeId") Long challengeId, @Param("userId") Long userId);
 	void joinChallenge(@Param("challengeId") Long challengeId, @Param("userId") Long userId);
-	void leaveChallenge(@Param("challengeId") Long challengeId, @Param("userId") Long userId);
+
+	// 추천 카테고리에 해당하는 챌린지들 조회
 	List<ChallengeVO> findChallengesByCategoryIds(@Param("categoryIds") List<Long> categoryIds, @Param("userId") Long userId);
+
+	// 사용자 챌린지 진척도 조회
+	ChallengeProgressDTO getChallengeProgress(@Param("userId") Long userId);
 }

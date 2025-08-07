@@ -4,6 +4,7 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import org.bbagisix.challenge.dto.ChallengeDTO;
+import org.bbagisix.challenge.dto.ChallengeProgressDTO;
 import org.bbagisix.challenge.service.ChallengeService;
 import org.bbagisix.exception.BusinessException;
 import org.bbagisix.exception.ErrorCode;
@@ -44,6 +45,15 @@ public class ChallengeController {
 		return ResponseEntity.ok(recommendedChallenges);
 	}
 
+	// 2-2. 챌린지 진척도 조회 API
+	// ChallengeController.java에 추가
+	@GetMapping("/progress")
+	public ResponseEntity<ChallengeProgressDTO> getChallengeProgress(Authentication authentication) {
+		CustomOAuth2User currentUser = (CustomOAuth2User) authentication.getPrincipal();
+		ChallengeProgressDTO result = challengeService.getChallengeProgress(currentUser.getUserId());
+		return ResponseEntity.ok(result);
+	}
+
 	// 3. 챌린지 참여 API (ExpenseController 패턴 적용)
 	@PostMapping("/{challengeId}/join")
 	public ResponseEntity<String> joinChallenge(
@@ -63,31 +73,6 @@ public class ChallengeController {
 
 			challengeService.joinChallenge(parsedChallengeId, currentUser.getUserId());
 			return ResponseEntity.ok("챌린지 참여가 완료되었습니다.");
-
-		} catch (NumberFormatException e) {
-			throw new BusinessException(ErrorCode.CHALLENGE_ID_REQUIRED);
-		}
-	}
-
-	// 4. 챌린지 탈퇴 API (ExpenseController 패턴 적용)
-	@DeleteMapping("/{challengeId}/leave")
-	public ResponseEntity<String> leaveChallenge(
-		@PathVariable String challengeId,
-		Authentication authentication) {
-
-		// challengeId 유효성 검사
-		if (challengeId == null || challengeId.trim().isEmpty() || challengeId.equalsIgnoreCase("null")) {
-			throw new BusinessException(ErrorCode.CHALLENGE_ID_REQUIRED);
-		}
-
-		try {
-			Long parsedChallengeId = Long.parseLong(challengeId);
-
-			// ExpenseController와 동일한 패턴으로 사용자 정보 추출
-			CustomOAuth2User currentUser = (CustomOAuth2User) authentication.getPrincipal();
-
-			challengeService.leaveChallenge(parsedChallengeId, currentUser.getUserId());
-			return ResponseEntity.ok("챌린지 탈퇴가 완료되었습니다.");
 
 		} catch (NumberFormatException e) {
 			throw new BusinessException(ErrorCode.CHALLENGE_ID_REQUIRED);
