@@ -67,13 +67,6 @@
                  )
     </insert>
 
-    <!-- 6. 챌린지 탈퇴 -->
-    <delete id="leaveChallenge">
-        DELETE FROM user_challenge
-        WHERE challenge_id = #{challengeId}
-          AND user_id = #{userId}
-    </delete>
-
     <!-- 7. 추천 카테고리에 해당하는 챌린지들 조회 -->
     <select id="findChallengesByCategoryIds" resultType="org.bbagisix.challenge.domain.ChallengeVO">
         SELECT
@@ -97,12 +90,13 @@
         ORDER BY c.challenge_id
         LIMIT 3
     </select>
+
     <!-- 8. 사용자 챌린지 진척도 조회 (새로 추가) -->
     <select id="getUserChallengeProgress" resultType="java.lang.Integer">
         SELECT progress
         FROM user_challenge
         WHERE challenge_id = #{challengeId}
-            AND user_id = #{userId}
+          AND user_id = #{userId}
+          AND status = 'ongoing'
     </select>
-
 </mapper>

@@ -53,6 +53,7 @@ public class ChallengeController {
 		CustomOAuth2User currentUser = (CustomOAuth2User) authentication.getPrincipal();
 		Integer progress = challengeService.getChallengeProgress(challengeId, currentUser.getUserId());
 		return ResponseEntity.ok(progress);
+
 	}
 
 	// 3. 챌린지 참여 API (ExpenseController 패턴 적용)
@@ -74,31 +75,6 @@ public class ChallengeController {
 
 			challengeService.joinChallenge(parsedChallengeId, currentUser.getUserId());
 			return ResponseEntity.ok("챌린지 참여가 완료되었습니다.");
-
-		} catch (NumberFormatException e) {
-			throw new BusinessException(ErrorCode.CHALLENGE_ID_REQUIRED);
-		}
-	}
-
-	// 4. 챌린지 탈퇴 API (ExpenseController 패턴 적용)
-	@DeleteMapping("/{challengeId}/leave")
-	public ResponseEntity<String> leaveChallenge(
-		@PathVariable String challengeId,
-		Authentication authentication) {
-
-		// challengeId 유효성 검사
-		if (challengeId == null || challengeId.trim().isEmpty() || challengeId.equalsIgnoreCase("null")) {
-			throw new BusinessException(ErrorCode.CHALLENGE_ID_REQUIRED);
-		}
-
-		try {
-			Long parsedChallengeId = Long.parseLong(challengeId);
-
-			// ExpenseController와 동일한 패턴으로 사용자 정보 추출
-			CustomOAuth2User currentUser = (CustomOAuth2User) authentication.getPrincipal();
-
-			challengeService.leaveChallenge(parsedChallengeId, currentUser.getUserId());
-			return ResponseEntity.ok("챌린지 탈퇴가 완료되었습니다.");
 
 		} catch (NumberFormatException e) {
 			throw new BusinessException(ErrorCode.CHALLENGE_ID_REQUIRED);

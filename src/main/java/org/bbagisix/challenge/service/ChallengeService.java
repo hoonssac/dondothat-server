@@ -56,6 +56,37 @@ public class ChallengeService {
 			.collect(Collectors.toList());
 	}
 
+	public Integer getChallengeProgress(Long challengeId, Long userId) {
+		if (challengeId == null) {
+			throw new BusinessException(ErrorCode.CHALLENGE_ID_REQUIRED);
+		}
+
+		if (userId == null) {
+			throw new BusinessException(ErrorCode.USER_ID_REQUIRED);
+		}
+
+		// 사용자 존재 여부 확인
+		if (!challengeMapper.existsUser(userId)) {
+			throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+		}
+
+		// 챌린지 존재 여부 확인
+		ChallengeVO challenge = challengeMapper.findByChallengeId(challengeId);
+		if (challenge == null) {
+			throw new BusinessException(ErrorCode.CHALLENGE_NOT_FOUND);
+		}
+
+		// 해당 챌린지에 참여하고 있는지 확인
+		if (!challengeMapper.existsUserChallenge(challengeId, userId)) {
+			throw new BusinessException(ErrorCode.CHALLENGE_NOT_JOINED);
+		}
+
+		// user_challenge 테이블에서 progress 값 조회
+		Integer progress = challengeMapper.getUserChallengeProgress(challengeId, userId);
+
+		return progress;
+	}
+
 	public void joinChallenge(Long challengeId, Long userId) {
 		if (challengeId == null) {
 			throw new BusinessException(ErrorCode.CHALLENGE_ID_REQUIRED);
@@ -83,34 +114,5 @@ public class ChallengeService {
 
 		// 챌린지 참여
 		challengeMapper.joinChallenge(challengeId, userId);
-	}
-
-	public void leaveChallenge(Long challengeId, Long userId) {
-		if (challengeId == null) {
-			throw new BusinessException(ErrorCode.CHALLENGE_ID_REQUIRED);
-		}
-
-		if (userId == null) {
-			throw new BusinessException(ErrorCode.USER_ID_REQUIRED);
-		}
-
-		// 사용자 존재 여부 확인
-		if (!challengeMapper.existsUser(userId)) {
-			throw new BusinessException(ErrorCode.USER_NOT_FOUND);
-		}
-
-		// 챌린지 존재 여부 확인
-		ChallengeVO challenge = challengeMapper.findByChallengeId(challengeId);
-		if (challenge == null) {
-			throw new BusinessException(ErrorCode.CHALLENGE_NOT_FOUND);
-		}
-
-		// 해당 챌린지에 실제로 참여하고 있는지 확인
-		if (!challengeMapper.existsUserChallenge(challengeId, userId)) {
-			throw new BusinessException(ErrorCode.CHALLENGE_NOT_JOINED);
-		}
-
-		// 챌린지 탈퇴
-		challengeMapper.leaveChallenge(challengeId, userId);
 	}
 }

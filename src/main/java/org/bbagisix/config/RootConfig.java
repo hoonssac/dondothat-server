@@ -15,12 +15,26 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.web.client.RestTemplate;
 
 import javax.sql.DataSource;
+import javax.validation.Valid;
 
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,12 +42,13 @@ import java.util.regex.Pattern;
 @PropertySource({"classpath:/application.properties"})
 @MapperScan(basePackages = {"org.bbagisix.**.mapper"})
 @ComponentScan(
-	basePackages = "org.bbagisix", // 스캔 범위는 동일
-	excludeFilters = {            // 제외할 필터를 지정
+	basePackages = "org.bbagisix",
+	excludeFilters = {
 		@ComponentScan.Filter(type = org.springframework.context.annotation.FilterType.ANNOTATION, classes = {
 			Controller.class, ControllerAdvice.class})
 	}
 )
+@EnableScheduling
 public class RootConfig {
 	private static final Logger log = LogManager.getLogger(RootConfig.class);
 	@Value("${jdbc.driver}")
@@ -50,6 +65,88 @@ public class RootConfig {
 	String username;
 	@Value("${DB_PASSWORD:1234}")
 	String password;
+
+	@Value("${REDIS_HOST:localhost}")
+	private String redisHost;
+	@Value("${REDIS_PORT:6379}")
+	private int redisPort;
+
+	@Value("${SPRING_MAIL_HOST}")
+	private String mailHost;
+	@Value("${SPRING_MAIL_PORT}")
+	private int mailPort;
+	@Value("${SPRING_MAIL_USERNAME}")
+	private String mailUsername;
+	@Value("${SPRING_MAIL_PASSWORD}")
+	private String mailPassword;
+
+	// OAuth 환경 변수
+	@Value("${GOOGLE_CLIENT_ID:}")
+	private String googleClientId;
+	@Value("${GOOGLE_CLIENT_SECRET:}")
+	private String googleClientSecret;
+	@Value("${NAVER_CLIENT_ID:}")
+	private String naverClientId;
+	@Value("${NAVER_CLIENT_SECRET:}")
+	private String naverClientSecret;
+	@Value("${BASE_URL:}")
+	private String baseUrl;
+	@Value("${JWT_SECRET}")
+	private String jwtSecret;
+
+	// CODEF 환경 변수
+	@Value("${CODEF_CLIENT_ID:}")
+	private String codefClientId;
+	@Value("${CODEF_CLIENT_SECRET:}")
+	private String codefClientSecret;
+	@Value("${CODEF_PUBLIC_KEY:}")
+	private String codefPublicKey;
+
+	@Bean
+	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+		return new PropertySourcesPlaceholderConfigurer();
+	}
+
+	@Bean
+	public RedisConnectionFactory redisConnectionFactory() {
+		return new LettuceConnectionFactory(redisHost, redisPort);
+	}
+
+	@Bean
+	public StringRedisTemplate stringRedisTemplate() {
+		StringRedisTemplate stringRedisTemplate = new StringRedisTemplate();
+		stringRedisTemplate.setConnectionFactory(redisConnectionFactory());
+		return stringRedisTemplate;
+	}
+
+	@Bean
+	public JavaMailSender javaMailSender() {
+		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+		mailSender.setHost(mailHost);
+		mailSender.setPort(mailPort);
+		mailSender.setUsername(mailUsername);
+		mailSender.setPassword(mailPassword);
+		mailSender.setDefaultEncoding("UTF-8");
+		mailSender.setJavaMailProperties(getMailProperties());
+
+		return mailSender;
+	}
+
+	private Properties getMailProperties() {
+		Properties properties = new Properties();
+		properties.put("mail.smtp.auth", "true");
+		properties.put("mail.smtp.starttls.enable", "true");
+
+		return properties;
+	}
+
+	@Bean
+	public RedisTemplate<String, Object> redisTemplate() {
+		RedisTemplate<String, Object> template = new RedisTemplate<>();
+		template.setConnectionFactory(redisConnectionFactory());
+		template.setDefaultSerializer(new GenericJackson2JsonRedisSerializer());
+		return template;
+	}
 
 	@Bean
 	public DataSource dataSource() {
@@ -117,5 +214,21 @@ public class RootConfig {
 		DataSourceTransactionManager manager = new DataSourceTransactionManager(dataSource());
 
 		return manager;
+	}
+
+	@Bean
+	public RestTemplate restTemplate() {
+		return new RestTemplate();
+	}
+
+	@Bean
+	public TaskScheduler taskScheduler(){
+		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+		scheduler.setPoolSize(2);
+		scheduler.setThreadNamePrefix("scheduler-");
+		scheduler.setWaitForTasksToCompleteOnShutdown(true);
+		scheduler.setAwaitTerminationSeconds(20);
+		scheduler.initialize();
+		return scheduler;
 	}
 }
