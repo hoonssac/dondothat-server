@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.bbagisix.challenge.domain.ChallengeVO;
+import org.bbagisix.challenge.domain.UserChallengeVO;
 import org.bbagisix.challenge.mapper.ChallengeMapper;
 import org.bbagisix.exception.BusinessException;
 import org.bbagisix.exception.ErrorCode;
-import org.bbagisix.saving.domain.UserChallengeVO;
 import org.bbagisix.saving.dto.SavingDTO;
 import org.bbagisix.saving.mapper.SavingMapper;
 import org.springframework.stereotype.Service;
