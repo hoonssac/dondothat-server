@@ -5,7 +5,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
+
 import org.bbagisix.analytics.service.AnalyticsService;
 import org.bbagisix.challenge.domain.ChallengeVO;
 import org.bbagisix.challenge.domain.UserChallengeVO;
@@ -17,6 +17,8 @@ import org.bbagisix.exception.ErrorCode;
 import org.bbagisix.expense.mapper.ExpenseMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -115,18 +117,24 @@ public class ChallengeService {
 			List<Long> expenseCtg
 				= expenseMapper.getTodayExpenseCategories(userId); // 유저 소비내역의 카테고리 아이디 조회
 
+			UserChallengeVO updated;
+
 			if (expenseCtg.contains(challengeCtg)) { // 소비내역에 현재 챌린지의 카테고리가 포함된 경우 -> 실패
-				c.setStatus("failed");
-				c.setEndDate(new Date());
+				updated = c.toBuilder()
+					.status("failed")
+					.endDate(new Date())
+					.build();
 			} else { // 유저 소비내역에 현재 챌린지의 카테고리가 포함되지 않은 경우 -> 하루 성공
-				c.setProgress(c.getProgress() + 1); // 진척도 +1
-				LocalDate endDate = c.getEndDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-				if (endDate.equals(LocalDate.now())) {  // 마지막 날인 경우 -> 최종 성공
-					c.setStatus("completed");
-				}
+				boolean isLastDay = c.getEndDate().toInstant().atZone(ZoneId.systemDefault())
+					.toLocalDate().equals(LocalDate.now());
+
+				updated = c.toBuilder()
+					.progress(c.getProgress() + 1)
+					.status(isLastDay ? "completed" : c.getStatus()) // 마지막 날인 경우 -> 최종 성공
+					.build();
 			}
-			System.out.println("수정 후 상태: " + c.getStatus());
-			challengeMapper.updateChallenge(c);
+
+			challengeMapper.updateChallenge(updated);
 		}
 	}
 }
