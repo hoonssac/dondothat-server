@@ -45,7 +45,7 @@ public class ChallengeController {
 		return ResponseEntity.ok(recommendedChallenges);
 	}
 
-	// 2-2. 챌린지 진척도 조회 API (새로 추가)
+	// 2-2. 챌린지 진척도 조회 API
 	// ChallengeController.java에 추가
 	@GetMapping("/progress")
 	public ResponseEntity<ChallengeProgressDTO> getChallengeProgress(Authentication authentication) {

@@ -8,9 +8,9 @@ import lombok.Getter;
 public class ChallengeProgressDTO {
 	private Long challenge_id;
 	private String title;
-	private Long period;        // Integer → Long
+	private Long period;
 	private String status;
-	private Long progress;      // Integer → Long
-	private Long saving;        // Integer → Long
+	private Long progress;
+	private Long saving;
 	private Boolean is_active;
 }

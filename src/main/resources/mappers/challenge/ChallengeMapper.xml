@@ -91,7 +91,7 @@
         LIMIT 3
     </select>
 
-    <!-- 8. 사용자 챌린지 진척도 조회 (새로 추가) -->
+    <!-- 8. 사용자 챌린지 진척도 조회 -->
     <select id="getChallengeProgress" resultType="org.bbagisix.challenge.dto.ChallengeProgressDTO">
         SELECT
             uc.challenge_id,
