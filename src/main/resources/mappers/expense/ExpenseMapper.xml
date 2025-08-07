@@ -65,4 +65,11 @@
         ORDER BY expenditure_date DESC
     </select>
 
+    <select id="getTodayExpenseCategories" parameterType="long" resultType="long">
+        SELECT category_id
+        FROM expenditure
+        WHERE user_id = #{userId}
+          AND DATE (expenditure_date)=CURDATE()
+    </select>
+
 </mapper>
