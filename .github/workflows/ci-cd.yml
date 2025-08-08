@@ -173,8 +173,8 @@ jobs:
                 environment:
                   - MYSQL_ROOT_PASSWORD=dondothat1234
                   - MYSQL_DATABASE=dondothat
-                expose:
-                  - "3306"
+                ports:
+                  - "3306:3306"
                 volumes:
                   - mysql_data:/var/lib/mysql
                 networks:
