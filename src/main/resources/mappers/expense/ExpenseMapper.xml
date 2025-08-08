@@ -72,4 +72,13 @@
           AND DATE (expenditure_date)=CURDATE()
     </select>
 
+    <select id="getSumOfPeriodExpenses" resultType="long">
+        SELECT SUM(amount)
+        FROM expenditure
+        WHERE user_id = #{userId}
+          AND category_id = #{categoryId}
+          AND expenditure_date
+            BETWEEN DATE_SUB(CURDATE() - INTERVAL 1 DAY, INTERVAL #{period} DAY)
+            AND (CURDATE() - INTERVAL 1 DAY)
+    </select>
 </mapper>
