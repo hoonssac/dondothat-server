@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.bbagisix.analytics.service.AnalyticsService;
@@ -76,14 +77,7 @@ public class ChallengeService {
 		return challengeMapper.getChallengeProgress(userId);
 	}
 
-	public void joinChallenge(Long challengeId, Long userId) {
-		if (challengeId == null) {
-			throw new BusinessException(ErrorCode.CHALLENGE_ID_REQUIRED);
-		}
-
-		if (userId == null) {
-			throw new BusinessException(ErrorCode.USER_ID_REQUIRED);
-		}
+	public void joinChallenge(Long userId, Long challengeId, Long period) {
 
 		// 사용자 존재 여부 확인
 		if (!challengeMapper.existsUser(userId)) {
@@ -101,8 +95,21 @@ public class ChallengeService {
 			throw new BusinessException(ErrorCode.ALREADY_JOINED_CHALLENGE);
 		}
 
+		// saving 계산
+		Long categoryId = challengeMapper.getCategoryByChallengeId(challengeId);
+		Long total = Optional.ofNullable(
+			expenseMapper.getSumOfPeriodExpenses(userId, categoryId, period)
+		).orElse(0L);
+		Long saving = total / period;
+
 		// 챌린지 참여
-		challengeMapper.joinChallenge(challengeId, userId);
+		UserChallengeVO userChallenge = UserChallengeVO.builder()
+			.userId(userId)
+			.challengeId(challengeId)
+			.period(period)
+			.saving(saving)
+			.build();
+		challengeMapper.joinChallenge(userChallenge);
 	}
 
 	// 챌린지 성공/실패 판단 및 진척도 계산
