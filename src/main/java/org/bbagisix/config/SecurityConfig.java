@@ -94,16 +94,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
-		CorsConfiguration configuration = new CorsConfiguration();
+	    CorsConfiguration configuration = new CorsConfiguration();
 
-		configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "https://dondothat.netlify.app", "http://dondothat.duckdns.org:8080"));
-		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-		configuration.setAllowedHeaders(Arrays.asList("*"));
-		configuration.setAllowCredentials(true); // 쿠키 전송 허용
-
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/**", configuration); // 모든 경로에 대해 위 설정 적용
-		return source;
+	    configuration.setAllowedOrigins(Arrays.asList(
+	        "http://localhost:5173", 
+	        "https://dondothat.netlify.app", 
+	        "http://dondothat.duckdns.org:8080",
+	        "https://54.208.50.238"  // 이 줄 추가
+	    ));
+	    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+	    configuration.setAllowedHeaders(Arrays.asList("*"));
+	    configuration.setAllowCredentials(true);
+	
+	    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+	    source.registerCorsConfiguration("/**", configuration);
+	    return source;
 	}
 
 	@Bean
