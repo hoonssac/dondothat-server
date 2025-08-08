@@ -18,7 +18,7 @@ public interface ChallengeMapper {
 
 	boolean existsUserChallenge(@Param("challengeId") Long challengeId, @Param("userId") Long userId);
 
-	void joinChallenge(@Param("challengeId") Long challengeId, @Param("userId") Long userId);
+	void joinChallenge(UserChallengeVO userChallenge);
 
 	// 추천 카테고리에 해당하는 챌린지들 조회
 	List<ChallengeVO> findChallengesByCategoryIds(@Param("categoryIds") List<Long> categoryIds,
