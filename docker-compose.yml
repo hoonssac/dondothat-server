@@ -35,7 +35,7 @@ services:
     expose:
       - "8080"
     environment:
-      - DB_HOST=mysql
+      - DB_HOST=mysql-server
       - DB_PORT=3306
       - DB_NAME=dondothat
       - DB_USER=root
@@ -75,11 +75,10 @@ services:
     networks:
       - backend
 
-  mysql:
+  mysql-server:
     image: mysql:8.0
-    container_name: mysql
+    container_name: mysql-server
     restart: always
-    hostname: localhost
     environment:
       - MYSQL_ROOT_PASSWORD=dondothat1234
       - MYSQL_DATABASE=dondothat
