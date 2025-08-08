@@ -54,29 +54,27 @@ public class ChallengeController {
 	// ChallengeController.java에 추가
 	@GetMapping("/progress")
 	public ResponseEntity<ChallengeProgressDTO> getChallengeProgress(Authentication authentication) {
-		CustomOAuth2User currentUser = (CustomOAuth2User) authentication.getPrincipal();
+		CustomOAuth2User currentUser = (CustomOAuth2User)authentication.getPrincipal();
 		ChallengeProgressDTO result = challengeService.getChallengeProgress(currentUser.getUserId());
 		return ResponseEntity.ok(result);
 	}
 
 	// 3. 챌린지 참여 API (ExpenseController 패턴 적용)
-	@PostMapping("/{challengeId}/join")
+	@PostMapping("/join/{challengeId}/{period}")
 	public ResponseEntity<String> joinChallenge(
-		@PathVariable String challengeId,
+		@PathVariable Long challengeId,
+		@PathVariable Long period,
 		Authentication authentication) {
 
 		// challengeId 유효성 검사
-		if (challengeId == null || challengeId.trim().isEmpty() || challengeId.equalsIgnoreCase("null")) {
+		if (challengeId == null) {
 			throw new BusinessException(ErrorCode.CHALLENGE_ID_REQUIRED);
 		}
 
 		try {
-			Long parsedChallengeId = Long.parseLong(challengeId);
-
 			// ExpenseController와 동일한 패턴으로 사용자 정보 추출
 			CustomOAuth2User currentUser = (CustomOAuth2User)authentication.getPrincipal();
-
-			challengeService.joinChallenge(parsedChallengeId, currentUser.getUserId());
+			challengeService.joinChallenge(currentUser.getUserId(), challengeId, period);
 			return ResponseEntity.ok("챌린지 참여가 완료되었습니다.");
 
 		} catch (NumberFormatException e) {
