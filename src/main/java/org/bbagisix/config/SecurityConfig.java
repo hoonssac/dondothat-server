@@ -59,6 +59,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http.sessionManagement()
 			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
+		http.sessionManagement(management ->
+			management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
 		// 경로별 인가 작업
 		http.authorizeRequests()
 			// 정적 리소스 허용
