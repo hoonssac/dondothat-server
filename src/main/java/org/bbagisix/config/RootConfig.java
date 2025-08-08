@@ -153,7 +153,7 @@ public class RootConfig {
 		HikariConfig config = new HikariConfig();
 
 		// 환경 변수를 사용하여 JDBC URL 구성
-		String jdbcUrl = String.format("jdbc:log4jdbc:mysql://%s:%s/%s", dbHost, dbPort, dbName);
+		String jdbcUrl = String.format("jdbc:log4jdbc:mysql://%s:%s/%s?useSSL=false", dbHost, dbPort, dbName);
 
 		config.setDriverClassName(driver);
 		config.setJdbcUrl(jdbcUrl);
