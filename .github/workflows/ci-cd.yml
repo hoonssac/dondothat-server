@@ -169,7 +169,7 @@ jobs:
             
               mysql:
                 image: mysql:8.0
-                container_name: mysql-server
+                container_name: mysql
                 environment:
                   - MYSQL_ROOT_PASSWORD=dondothat1234
                   - MYSQL_DATABASE=dondothat
