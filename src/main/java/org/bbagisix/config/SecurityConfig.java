@@ -25,6 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.ForwardedHeaderFilter;
 
 import lombok.RequiredArgsConstructor;
 
@@ -58,6 +59,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http.sessionManagement()
 			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
+		http.sessionManagement(management ->
+			management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
 		// 경로별 인가 작업
 		http.authorizeRequests()
 			// 정적 리소스 허용
@@ -90,6 +94,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			googleClientRegistration(environment),
 			naverClientRegistration(environment)
 		);
+	}
+
+	@Bean
+	public ForwardedHeaderFilter forwardedHeaderFilter() {
+		return new ForwardedHeaderFilter();
 	}
 
 	@Bean

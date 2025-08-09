@@ -161,20 +161,20 @@ jobs:
                   - CODEF_CLIENT_SECRET=$CODEF_CLIENT_SECRET
                   - CODEF_PUBLIC_KEY=$CODEF_PUBLIC_KEY
                 depends_on:
-                  - mysql
+                  - mysql-server
                   - redis-server
                 networks:
                   - dondothat-network
                 restart: unless-stopped
             
-              mysql:
+              mysql-server:
                 image: mysql:8.0
-                container_name: mysql
+                container_name: mysql-server
                 environment:
                   - MYSQL_ROOT_PASSWORD=dondothat1234
                   - MYSQL_DATABASE=dondothat
-                expose:
-                  - "3306"
+                ports:
+                  - "3306:3306"
                 volumes:
                   - mysql_data:/var/lib/mysql
                 networks:
