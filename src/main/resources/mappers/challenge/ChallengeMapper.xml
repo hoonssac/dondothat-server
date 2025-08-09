@@ -58,7 +58,7 @@
                 NOW(),
                 DATE_ADD(NOW(), INTERVAL #{period} DAY),
                 #{saving},
-                false)
+                0)
     </insert>
 
     <!-- 7. 추천 카테고리에 해당하는 챌린지들 조회 -->
