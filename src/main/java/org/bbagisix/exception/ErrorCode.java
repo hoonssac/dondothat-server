@@ -71,6 +71,12 @@ public enum ErrorCode {
 
 	// 암호화 관련 에러
 	ENCRYPTION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "E001", "암호화 처리 중 오류가 발생했습니다."),
+	
+	// 금융상품 관련 에러
+	FSS_API_CALL_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "FP001", "금감원 API 호출에 실패했습니다."),
+	FSS_API_RESPONSE_ERROR(HttpStatus.BAD_GATEWAY, "FP002", "금감원 API 응답 처리 중 오류가 발생했습니다."),
+	FINPRODUCT_DATA_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FP003", "금융상품 데이터 저장에 실패했습니다."),
+	FINPRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "FP004", "금융상품을 찾을 수 없습니다."),
 
 	// Authentication 관련 에러
 	AUTHENTICATION_REQUIRED(HttpStatus.INTERNAL_SERVER_ERROR,"AU01", "Authentication인증이 필요합니다."),
