@@ -11,9 +11,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import java.util.ArrayList;
-import java.util.List;
-
+// 금감원 API 호출 서비스
 @Log4j2
 @Service
 @RequiredArgsConstructor
