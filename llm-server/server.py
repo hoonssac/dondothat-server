@@ -49,62 +49,24 @@ def keyword_filtering(desc: str) -> int:
                 return id 
     return -1
 
-def extract_number_from_response(response_text: str) -> int:
-    """응답에서 숫자를 추출하고 유효성 검사"""
-    # 숫자만 추출
-    numbers = re.findall(r'\d+', response_text)
-    if numbers:
-        category_id = int(numbers[0])
-        # 1~7 범위만 허용
-        if 1 <= category_id <= 7:
-            return category_id
-    # 기본값으로 7 (술/유흥) 반환
-    return 7
-
 def classify_category(desc):
     filtered = keyword_filtering(desc)
     if filtered != -1:
         return filtered
 
-    messages = [
-        {
-            "role": "system",
-            "content": """당신은 한국의 소비 패턴을 정확히 이해하는 금융 분석 전문가입니다. 
-소비 내역을 정확한 카테고리로 분류하는 것이 당신의 임무입니다.
-
-분류 규칙:
-1. 반드시 1~7 중 하나의 숫자만 출력하세요
-2. 설명이나 다른 텍스트는 절대 포함하지 마세요
-3. 애매한 경우 가장 가능성이 높은 카테고리를 선택하세요
-4. 8~14번 카테고리는 존재하지 않습니다"""
-        },
-        {
-            "role": "user", 
-            "content": f"""소비내역: "{desc}"
-
-다음 카테고리 중 하나로 분류하세요:
-
-1: 배달음식 (배달의민족, 요기요, 쿠팡이츠 등)
-2: 카페/간식 (스타벅스, 투썸, 커피전문점, 베이커리 등)
-3: 쇼핑 (백화점, 온라인쇼핑, 패션, 화장품 등)
-4: 택시 (카카오T, 우버, 일반택시 등)
-5: 편의점 (CU, GS25, 세븐일레븐, 이마트24 등)
-6: 문화 (영화관, 공연, 도서, 스포츠, 티켓 등)
-7: 술/유흥 (술집, 맥주, 소주, 와인 등)
-
-숫자만 출력하세요:"""
-        }
-    ]
-    
+    prompt = f'''
+    소비내역: {desc}
+    소비내역을 아래 카테고리 번호 중 하나로 분류하세요. 설명없이 카테고리 번호만 출력하세요.
+    (카페/간식:2, 쇼핑:3, 택시:4, 편의점:5, 문화(영화관, 티켓, 공연, 스포츠):6,
+    술/유흥:7, 대중교통:8, 의료(병원/약국):9, 생활(마트/생활/주거):10, 식비:11, 기타:12)
+    우아한형제들과 요기요만 1로 분류하세요.:
+    '''
     response = client.chat.completions.create(
         model="gpt-4o",
-        messages=messages,
-        temperature=0,
-        max_tokens=10
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0
     )
-    
-    response_text = response.choices[0].message.content.strip()
-    return extract_number_from_response(response_text)
+    return response.choices[0].message.content.strip()
 
 async def classify_category_async(desc):
     loop = asyncio.get_event_loop()
