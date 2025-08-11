@@ -70,7 +70,7 @@
         FROM saving_base b
         INNER JOIN saving_option o ON b.saving_base_id = o.saving_base_id
         INNER JOIN user u ON u.user_id = #{userId}
-        LEFT JOIN asset a ON a.user_id = #{userId} AND a.status = 'main'
+        LEFT JOIN user_asset a ON a.user_id = #{userId} AND a.status = 'main'
         WHERE 1=1
         
         <!-- 1차 필터링: 명백한 불가능 케이스 제외 -->
