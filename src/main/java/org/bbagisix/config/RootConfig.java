@@ -99,6 +99,12 @@ public class RootConfig {
     private String codefClientSecret;
     @Value("${CODEF_PUBLIC_KEY:}")
     private String codefPublicKey;
+    
+    // FSS API 환경 변수
+    @Value("${fss.api.key}")
+    private String fssApiKey;
+    @Value("${fss.api.url}")
+    private String fssApiUrl;
 
     @Bean
     public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
