@@ -11,25 +11,17 @@ import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
 
-/**
- * 적금상품 추천 서비스
- * 하이브리드 방식: 백엔드 1차 필터링 + LLM 2차 지능형 추천
- */
+// 적금상품 추천 서비스
+// 하이브리드 방식: 백엔드 1차 필터링 + LLM 2차 지능형 추천
 @Log4j2
 @Service
 @RequiredArgsConstructor
 public class RecommendationService {
     
     private final FinProductMapper finProductMapper;
-    
-    /**
-     * 사용자 맞춤 적금상품 1차 필터링
-     * 명백한 불가능 케이스(나이 제한, 직업 제한)를 제외하고 필터링된 데이터를 반환
-     * 
-     * @param userId 사용자 ID
-     * @param limit 조회 건수 제한 (null이면 전체 조회)
-     * @return 필터링된 적금 상품 목록
-     */
+
+    // 사용자 맞춤 적금상품 1차 필터링
+    // 명백한 불가능 케이스(나이 제한, 직업 제한)를 제외하고 필터링된 데이터를 반환
     public List<RecommendedSavingDTO> getFilteredSavings(Long userId, Integer limit) {
         try {
             log.info("사용자 {}에 대한 1차 필터링 시작 - limit: {}", userId, limit);
