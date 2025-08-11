@@ -20,7 +20,7 @@ import lombok.extern.log4j.Log4j2;
 public class ClassifyServiceImpl implements ClassifyService {
 
 	private final RestTemplate restTemplate = new RestTemplate();
-	private static final String URL = "http://dondothat.duckdns.org:8000/classify";
+	private static final String URL = "http://llm-server:8000/classify";
 
 	@Override
 	public List<ExpenseVO> classify(List<ExpenseVO> expenses) {
