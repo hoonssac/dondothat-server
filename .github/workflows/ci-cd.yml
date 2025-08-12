@@ -141,8 +141,8 @@ jobs:
                 container_name: llm-server
                 expose:
                   - "8000"
-               environment:
-                  - API_KEY=${{ secrets.API_KEY }}"
+                environment:
+                  - API_KEY=${{ secrets.API_KEY }}
                 networks:
                   - dondothat-network
                 restart: unless-stopped
