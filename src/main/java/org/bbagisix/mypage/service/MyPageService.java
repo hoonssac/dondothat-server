@@ -42,15 +42,10 @@ public class MyPageService {
 			.build();
 	}
 
-	/**
-	 * 마이페이지 - 완료된(complete/failed) 사용자 챌린지 목록 조회
-	 * - challengeMapper.getUserCompletedChallenges(userId)
-	 *   결과(UserChallengeVO)를 UserChallengeDTO로 변환하여 반환
-	 */
+	// 완료된(complete/failed) 사용자 챌린지 목록 조회
 	public List<UserChallengeDTO> getUserChallenges(Authentication authentication) {
 		Long userId = extractUserId(authentication);
 
-		// 완료된 챌린지들 조회 (completed + failed)
 		List<UserChallengeVO> userChallenges = challengeMapper.getUserCompletedChallenges(userId);
 
 		return userChallenges.stream()

@@ -127,7 +127,7 @@
         where user_challenge_id = #{userChallengeId}
     </select>
 
-    <!-- ✅ (신규) 완료된 챌린지들 조회 (completed + failed) -->
+    <!--  완료된 챌린지들 조회 (completed + failed) -->
     <select id="getUserCompletedChallenges" resultType="org.bbagisix.challenge.domain.UserChallengeVO">
         SELECT
             user_challenge_id,

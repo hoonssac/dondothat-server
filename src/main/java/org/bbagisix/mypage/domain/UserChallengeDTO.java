@@ -13,15 +13,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserChallengeDTO {
 	private Long userChallengeId;
-	private String title;           // 챌린지 제목
-	private String status;          // completed, failed
+	private String title;
+	private String status;
 
 	// JSON 출력 시 날짜 형식 지정
 	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
-	private Date startDate;         // 시작일
+	private Date startDate;
 
 	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
-	private Date endDate;           // 종료일
+	private Date endDate;
 
-	private Long categoryId;        // 아이콘용
+	private Long categoryId;
 }
