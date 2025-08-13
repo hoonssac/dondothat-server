@@ -9,9 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MyPageAccountDTO {
+public class MyPageDTO {
 	private AccountInfo mainAccount;
 	private AccountInfo subAccount;
+	private TierInfo tierInfo;
 
 	@Getter
 	@Builder
@@ -23,5 +24,15 @@ public class MyPageAccountDTO {
 		private String bankName;
 		private Long balance;
 		private String status;    // main, sub
+	}
+
+	@Getter
+	@Builder
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class TierInfo {
+		private Long tierId;
+		private String tierName;
+		private Integer completedChallenges;
 	}
 }
