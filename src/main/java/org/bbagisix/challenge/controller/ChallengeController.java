@@ -101,6 +101,7 @@ public class ChallengeController {
 		} catch (NumberFormatException e) {
 			throw new BusinessException(ErrorCode.CHALLENGE_ID_REQUIRED);
 		}
+	}
 
 	@PostMapping("/close/{userChallengeId}")
 	public ResponseEntity<String> closeChallenge(@PathVariable Long userChallengeId) {
