@@ -145,4 +145,28 @@
           AND status IN ('completed', 'failed')
         ORDER BY end_date DESC, start_date DESC
     </select>
+
+    <!-- 챌린지 실패시 소비내역 조회 -->
+    <select id="getFailExpenditures" resultType="org.bbagisix.challenge.dto.ChallengeFailDTO">
+        SELECT
+            e.amount,
+            e.description,
+            e.expenditure_date as expenditureDate
+        FROM expenditure e
+                 JOIN (
+            SELECT user_id, MAX(end_date) as latest_end_date
+            FROM user_challenge
+            WHERE user_id = #{userId}
+            GROUP BY user_id
+        ) uc ON e.user_id = uc.user_id
+            AND DATE(e.expenditure_date) = DATE(uc.latest_end_date)
+        WHERE e.user_id = #{userId}
+          AND e.category_id = #{challengeId}
+          AND EXISTS (
+            SELECT 1
+            FROM user_challenge uc2
+            WHERE uc2.user_id = #{userId}
+              AND uc2.challenge_id = #{challengeId}
+        )
+    </select>
 </mapper>

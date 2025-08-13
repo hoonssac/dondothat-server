@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.bbagisix.challenge.domain.ChallengeVO;
 import org.bbagisix.challenge.domain.UserChallengeVO;
+import org.bbagisix.challenge.dto.ChallengeFailDTO;
 import org.bbagisix.challenge.dto.ChallengeProgressDTO;
 
 @Mapper
@@ -38,5 +39,6 @@ public interface ChallengeMapper {
 	// 완료된 챌린지들만 조회 (completed + failed)
 	List<UserChallengeVO> getUserCompletedChallenges(@Param("userId") Long userId);
 
+	List<ChallengeFailDTO> getFailExpenditures(@Param("userId") Long userId, @Param("challengeId") Long challengeId);
 
 }
