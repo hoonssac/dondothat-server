@@ -3,6 +3,7 @@ package org.bbagisix.challenge.controller;
 import java.util.List;
 
 import org.bbagisix.challenge.dto.ChallengeDTO;
+import org.bbagisix.challenge.dto.ChallengeFailDTO;
 import org.bbagisix.challenge.dto.ChallengeProgressDTO;
 import org.bbagisix.challenge.service.ChallengeService;
 import org.bbagisix.exception.BusinessException;
@@ -77,6 +78,26 @@ public class ChallengeController {
 			challengeService.joinChallenge(currentUser.getUserId(), challengeId, period);
 			return ResponseEntity.ok("챌린지 참여가 완료되었습니다.");
 
+		} catch (NumberFormatException e) {
+			throw new BusinessException(ErrorCode.CHALLENGE_ID_REQUIRED);
+		}
+	}
+
+	// 챌린지 실패 POST /api/challenges/{challenge_id}/fail
+	@PostMapping("/{challengeId}/fail")
+	public ResponseEntity<List<ChallengeFailDTO>> failChallenge(
+		@PathVariable Long challengeId,
+		Authentication authentication) {
+
+		// challengeId 유효성 검사
+		if (challengeId == null) {
+			throw new BusinessException(ErrorCode.CHALLENGE_ID_REQUIRED);
+		}
+
+		try {
+			CustomOAuth2User currentUser = (CustomOAuth2User)authentication.getPrincipal();
+			List<ChallengeFailDTO> failDTOList = challengeService.failChallenge(currentUser.getUserId(), challengeId);
+			return ResponseEntity.ok(failDTOList);
 		} catch (NumberFormatException e) {
 			throw new BusinessException(ErrorCode.CHALLENGE_ID_REQUIRED);
 		}
