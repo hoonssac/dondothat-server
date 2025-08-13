@@ -65,53 +65,50 @@ public class TierService {
 	public void promoteUserTier(Long userId) {
 		// 완료한 챌린지 수 조회
 		Integer completedChallenges = userMapper.getCompletedChallengeCount(userId);
-		
+
 		// 완료한 챌린지 수에 기반한 적절한 tier 계산
 		Long appropriateTierId = calculateTierByCompletedChallenges(completedChallenges);
-		
+
 		// 현재 사용자 정보 조회
 		UserVO user = userMapper.findByUserId(userId);
 		Long currentTierId = user.getTierId();
-		
+
 		// 계산된 tier가 현재 tier보다 높은 경우에만 업데이트
 		if (appropriateTierId > (currentTierId != null ? currentTierId : 0L)) {
 			// 해당 tier가 실제로 존재하는지 확인
 			TierVO targetTier = tierMapper.findById(appropriateTierId);
 			if (targetTier != null) {
-				userMapper.updateUserTier(userId, appropriateTierId);
-				log.info("사용자 {} 티어 승급: {} → {} (완료한 챌린지: {}개)", 
-					userId, currentTierId, appropriateTierId, completedChallenges);
+				int updateResult = userMapper.updateUserTier(userId, appropriateTierId);
+				if (updateResult > 0) {
+					log.info("✅ 사용자 {} 티어 승급 성공: {} → {} (완료한 챌린지: {}개)",
+						userId, currentTierId, appropriateTierId, completedChallenges);
+				} else {
+					log.error("❌ 사용자 {} 티어 업데이트 실패", userId);
+				}
+			} else {
+				log.error("❌ tier_id {} 에 해당하는 tier가 존재하지 않음", appropriateTierId);
 			}
+		} else {
+			log.info("⏭️ tier 업데이트 조건 불만족 - 현재: {}, 계산된: {}", currentTierId, appropriateTierId);
 		}
 	}
-	
+
 	// 완료한 챌린지 수에 따른 tier 계산
 	private Long calculateTierByCompletedChallenges(Integer completedChallenges) {
 		if (completedChallenges == null || completedChallenges == 0) {
-			return 1L; // 기본 tier
+			return 1L; // default
+		} else if (completedChallenges <= 1) {
+			return 1L; // 브론즈
 		} else if (completedChallenges <= 2) {
-			return 1L;
+			return 2L; // 실버
+		} else if (completedChallenges <= 3) {
+			return 3L; // 골드
+		} else if (completedChallenges <= 4) {
+			return 4L; // 플래티넘
 		} else if (completedChallenges <= 5) {
-			return 2L;
-		} else if (completedChallenges <= 10) {
-			return 3L;
+			return 5L; // 루비
 		} else {
-			return 4L; // 최고 tier
+			return 6L; // 에메랄드
 		}
-	}
-	
-	// 모든 사용자의 tier를 완료한 챌린지 수에 기반하여 재계산
-	@Transactional
-	public void recalculateAllUserTiers() {
-		// 모든 사용자 ID 조회 (UserMapper에 메서드가 없으므로 간단히 특정 사용자만 처리)
-		log.info("모든 사용자 tier 재계산 시작");
-		// 이 메서드는 필요시 모든 사용자를 대상으로 tier 재계산을 수행할 수 있습니다
-	}
-	
-	// 특정 사용자의 tier를 완료한 챌린지 수에 기반하여 재계산
-	@Transactional
-	public void recalculateUserTier(Long userId) {
-		promoteUserTier(userId);
-		log.info("사용자 {} tier 재계산 완료", userId);
 	}
 }
