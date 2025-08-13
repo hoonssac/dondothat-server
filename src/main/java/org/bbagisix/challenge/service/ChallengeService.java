@@ -11,6 +11,7 @@ import org.bbagisix.analytics.service.AnalyticsService;
 import org.bbagisix.challenge.domain.ChallengeVO;
 import org.bbagisix.challenge.domain.UserChallengeVO;
 import org.bbagisix.challenge.dto.ChallengeDTO;
+import org.bbagisix.challenge.dto.ChallengeFailDTO;
 import org.bbagisix.challenge.dto.ChallengeProgressDTO;
 import org.bbagisix.challenge.mapper.ChallengeMapper;
 import org.bbagisix.exception.BusinessException;
@@ -151,4 +152,10 @@ public class ChallengeService {
 			challengeMapper.updateChallenge(updated);
 		}
 	}
+
+	// 실패시 해당 카테고리 지출 내역 가져오기
+	public List<ChallengeFailDTO> failChallenge(Long userId, Long challengeId){
+		return challengeMapper.getFailExpenditures(userId, challengeId);
+	}
+
 }
