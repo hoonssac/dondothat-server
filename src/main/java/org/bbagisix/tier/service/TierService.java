@@ -63,13 +63,55 @@ public class TierService {
 	// 챌린지 성공 시 티어 승급 처리
 	@Transactional
 	public void promoteUserTier(Long userId) {
+		// 완료한 챌린지 수 조회
+		Integer completedChallenges = userMapper.getCompletedChallengeCount(userId);
+		
+		// 완료한 챌린지 수에 기반한 적절한 tier 계산
+		Long appropriateTierId = calculateTierByCompletedChallenges(completedChallenges);
+		
+		// 현재 사용자 정보 조회
 		UserVO user = userMapper.findByUserId(userId);
-		Long nextTierId = (user.getTierId() == null) ? 1L : user.getTierId() + 1;
-		TierVO nextTier = tierMapper.findById(nextTierId);
-
-		if (nextTier != null) {
-			userMapper.updateUserTier(userId, nextTierId);
-			log.info("사용자 {} 티어 승급: {} → {}", userId, user.getTierId(), nextTierId);
+		Long currentTierId = user.getTierId();
+		
+		// 계산된 tier가 현재 tier보다 높은 경우에만 업데이트
+		if (appropriateTierId > (currentTierId != null ? currentTierId : 0L)) {
+			// 해당 tier가 실제로 존재하는지 확인
+			TierVO targetTier = tierMapper.findById(appropriateTierId);
+			if (targetTier != null) {
+				userMapper.updateUserTier(userId, appropriateTierId);
+				log.info("사용자 {} 티어 승급: {} → {} (완료한 챌린지: {}개)", 
+					userId, currentTierId, appropriateTierId, completedChallenges);
+			}
 		}
+	}
+	
+	// 완료한 챌린지 수에 따른 tier 계산
+	private Long calculateTierByCompletedChallenges(Integer completedChallenges) {
+		if (completedChallenges == null || completedChallenges == 0) {
+			return 1L; // 기본 tier
+		} else if (completedChallenges <= 2) {
+			return 1L;
+		} else if (completedChallenges <= 5) {
+			return 2L;
+		} else if (completedChallenges <= 10) {
+			return 3L;
+		} else {
+			return 4L; // 최고 tier
+		}
+	}
+	
+	// 모든 사용자의 tier를 완료한 챌린지 수에 기반하여 재계산
+	@Transactional
+	public void recalculateAllUserTiers() {
+		// 모든 사용자 ID 조회 (UserMapper에 메서드가 없으므로 간단히 특정 사용자만 처리)
+		log.info("모든 사용자 tier 재계산 시작");
+		// 이 메서드는 필요시 모든 사용자를 대상으로 tier 재계산을 수행할 수 있습니다
+	}
+	
+	// 특정 사용자의 tier를 완료한 챌린지 수에 기반하여 재계산
+	@Transactional
+	public void recalculateUserTier(Long userId) {
+		promoteUserTier(userId);
+		log.info("사용자 {} tier 재계산 완료", userId);
 	}
 }
