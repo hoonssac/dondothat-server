@@ -1,6 +1,6 @@
 package org.bbagisix.mypage.controller;
 
-import org.bbagisix.mypage.domain.MyPageAccountDTO;
+import org.bbagisix.mypage.domain.MyPageDTO;
 import org.bbagisix.mypage.service.MyPageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,11 +20,16 @@ public class MyPageController {
 	private final MyPageService myPageService;
 
 	@GetMapping("/accounts")
-	public ResponseEntity<MyPageAccountDTO> getUserAccounts(Authentication authentication) {
-		MyPageAccountDTO response = myPageService.getUserAccountData(authentication);
+	public ResponseEntity<MyPageDTO> getUserAccounts(Authentication authentication) {
+		MyPageDTO response = myPageService.getUserAccountData(authentication);
 		return ResponseEntity.ok(response);
 	}
 
-	// @GetMapping("/tier")          // 뱃지 목록
+	@GetMapping("/tier")
+	public ResponseEntity<MyPageDTO.TierInfo> getUserTier(Authentication authentication) {
+		MyPageDTO.TierInfo tierInfo = myPageService.getUserTierInfo(authentication);
+		return ResponseEntity.ok(tierInfo);
+	}
+
 	// @GetMapping("/challenges")      // 챌린지 요약
 }
