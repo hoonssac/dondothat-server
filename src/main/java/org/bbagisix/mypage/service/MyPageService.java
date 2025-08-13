@@ -1,12 +1,19 @@
 package org.bbagisix.mypage.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.bbagisix.asset.domain.AssetVO;
 import org.bbagisix.asset.mapper.AssetMapper;
+import org.bbagisix.challenge.domain.ChallengeVO;
+import org.bbagisix.challenge.domain.UserChallengeVO;
+import org.bbagisix.challenge.mapper.ChallengeMapper;
 import org.bbagisix.exception.BusinessException;
 import org.bbagisix.exception.ErrorCode;
 import org.bbagisix.mypage.domain.MyPageDTO;
 import org.bbagisix.tier.service.TierService;
 import org.bbagisix.tier.dto.TierDTO;
+import org.bbagisix.mypage.domain.UserChallengeDTO;
 import org.bbagisix.user.dto.CustomOAuth2User;
 import org.bbagisix.user.mapper.UserMapper;
 import org.springframework.security.core.Authentication;
@@ -23,6 +30,7 @@ public class MyPageService {
 	private final AssetMapper assetMapper;
 	private final UserMapper userMapper;
 	private final TierService tierService;
+	private final ChallengeMapper challengeMapper;
 
 	public MyPageDTO getUserAccountData(Authentication authentication) {
 		Long userId = extractUserId(authentication);
@@ -68,6 +76,17 @@ public class MyPageService {
 			.build();
 	}
 
+	// 완료된(complete/failed) 사용자 챌린지 목록 조회
+	public List<UserChallengeDTO> getUserChallenges(Authentication authentication) {
+		Long userId = extractUserId(authentication);
+
+		List<UserChallengeVO> userChallenges = challengeMapper.getUserCompletedChallenges(userId);
+
+		return userChallenges.stream()
+			.map(this::convertToUserChallengeDTO)
+			.collect(Collectors.toList());
+	}
+
 	// Authentication에서 사용자 ID 추출
 	private Long extractUserId(Authentication authentication) {
 		if (authentication == null || authentication.getPrincipal() == null) {
@@ -95,5 +114,20 @@ public class MyPageService {
 	private Integer getCompletedChallengeCount(Long userId) {
 		Integer count = userMapper.getCompletedChallengeCount(userId);
 		return count != null ? count : 0;
+  }
+
+	private UserChallengeDTO convertToUserChallengeDTO(UserChallengeVO userChallenge) {
+		// 챌린지 상세 정보 조회
+		ChallengeVO challenge = challengeMapper.findByChallengeId(userChallenge.getChallengeId());
+		Long categoryId = challengeMapper.getCategoryByChallengeId(userChallenge.getChallengeId());
+
+		return UserChallengeDTO.builder()
+			.userChallengeId(userChallenge.getUserChallengeId())
+			.title(challenge != null ? challenge.getTitle() : "알 수 없는 챌린지")
+			.status(userChallenge.getStatus())
+			.startDate(userChallenge.getStartDate())
+			.endDate(userChallenge.getEndDate())
+			.categoryId(categoryId)
+			.build();
 	}
 }
