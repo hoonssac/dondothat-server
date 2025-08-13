@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MyPageAccountDTO {
+public class MyPageDTO {
 	private AccountInfo mainAccount;
 	private AccountInfo subAccount;
 	private TierInfo tierInfo;
