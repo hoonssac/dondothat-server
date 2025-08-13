@@ -1,6 +1,9 @@
 package org.bbagisix.mypage.controller;
 
+import java.util.List;
+
 import org.bbagisix.mypage.domain.MyPageAccountDTO;
+import org.bbagisix.mypage.domain.UserChallengeDTO;
 import org.bbagisix.mypage.service.MyPageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -25,6 +28,10 @@ public class MyPageController {
 		return ResponseEntity.ok(response);
 	}
 
+	@GetMapping("/challenges/completed")
+	public ResponseEntity<List<UserChallengeDTO>> getUserChallenges(Authentication authentication) {
+		List<UserChallengeDTO> challenges = myPageService.getUserChallenges(authentication);
+		return ResponseEntity.ok(challenges);
+	}
 	// @GetMapping("/tier")          // 뱃지 목록
-	// @GetMapping("/challenges")      // 챌린지 요약
 }
