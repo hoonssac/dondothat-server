@@ -93,6 +93,7 @@ jobs:
             export API_KEY="${{ secrets.API_KEY }}"
             export FSS_API_KEY="${{ secrets.FSS_API_KEY }}"
             export FSS_API_URL="${{ secrets.FSS_API_URL }}"
+            export LLM_SERVER_URL="${{ secrets.LLM_SERVER_URL }}"
             
             # SSL 인증서 디렉토리 생성 (없다면)
             mkdir -p ssl
@@ -177,6 +178,7 @@ jobs:
                   - CODEF_PUBLIC_KEY=$CODEF_PUBLIC_KEY
                   - FSS_API_KEY=${{ secrets.FSS_API_KEY }}
                   - FSS_API_URL=${{ secrets.FSS_API_URL }}
+                  - LLM_SERVER_URL=${{ secrets.LLM_SERVER_URL }}
                 depends_on:
                   - mysql-server
                   - redis-server
