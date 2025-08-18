@@ -34,25 +34,20 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
-		// STOMP 엔드포인트 등록
-		registry.addEndpoint("/api/ws/chat")
-			.setAllowedOriginPatterns("*")        // CORS 설정 (구체적인 도메인으로 추후 변경)
-			.withSockJS();                // SockJS fallback 옵션
-
+		// STOMP 엔드포인트 등록 - 하나만 등록!
 		registry.addEndpoint("/api/ws/chat")
 			.setAllowedOriginPatterns(
 				"http://localhost:*",
 				"http://127.0.0.1:*",
 				"https://*.netlify.app",
-				"http://dondothat.duckdns.org:*"
+				"https://54.208.50.238"  // 백엔드 IP도 추가
 			)
 			.withSockJS()
-			.setHeartbeatTime(25000)    // 하트비트 주기 (클라이언트와 연결 상태 유지)
+			.setHeartbeatTime(25000)    // 하트비트 주기
 			.setDisconnectDelay(5000)   // 연결 종료까지 지연 시간
-			.setSessionCookieNeeded(false); // SockJS 세션 쿠키 비활성화 (JWT 사용)
+			.setSessionCookieNeeded(false); // SockJS 세션 쿠키 비활성화
 
-		log.info("[WebSocketConfig] STOMP 엔드포인트 등록 완료: /ws/chat");
-
+		log.info("[WebSocketConfig] STOMP 엔드포인트 등록 완료: /api/ws/chat");
 	}
 
 	@Override
