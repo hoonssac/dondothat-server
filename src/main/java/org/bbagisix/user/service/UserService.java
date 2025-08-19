@@ -81,7 +81,7 @@ public class UserService {
 	}
 
 	@Transactional
-	public String signUp(SignUpRequest signUpRequest, HttpServletResponse response) {
+	public String signUp(SignUpRequest signUpRequest, HttpServletResponse response, HttpServletRequest request) {
 		if (isEmailDuplicate(signUpRequest.getEmail())) {
 			throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
 		}
@@ -111,12 +111,12 @@ public class UserService {
 			24 * 60 * 60 * 1000L
 		);
 
-		CookieUtil.addJwtCookie(response, token);
+		CookieUtil.addJwtCookie(response, token, request);
 		return "회원가입 완료.";
 	}
 
 	@Transactional
-	public String login(String email, String password, HttpServletResponse response) {
+	public String login(String email, String password, HttpServletResponse response, HttpServletRequest request) {
 		UserVO user = userMapper.findByEmail(email);
 		if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
 			throw new BusinessException(ErrorCode.USER_NOT_FOUND);
@@ -133,7 +133,7 @@ public class UserService {
 		);
 
 		// JWT 토큰을 HttpOnly 쿠키로 설정
-		CookieUtil.addJwtCookie(response, token);
+		CookieUtil.addJwtCookie(response, token, request);
 
 		return "로그인 성공.";
 	}
@@ -163,10 +163,10 @@ public class UserService {
 
 	@Transactional
 	public void processOAuth2Login(String email, String role, String name, String nickname, Long userId,
-		HttpServletResponse response) {
+		HttpServletResponse response, HttpServletRequest request) {
 		log.info("OAuth2 로그인 처리 시작: {}", email);
 		String token = jwtUtil.createToken(email, role, name, nickname, userId, 24 * 60 * 60 * 1000L);
-		CookieUtil.addJwtCookie(response, token);
+		CookieUtil.addJwtCookie(response, token, request);
 		log.info("OAuth2 로그인 JWT 쿠키 설정 완료: {}", email);
 	}
 

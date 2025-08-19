@@ -34,13 +34,13 @@ public class UserController {
 	}
 
 	@PostMapping("/signup")
-	public ResponseEntity<String> signUp(@Valid @RequestBody SignUpRequest request, HttpServletResponse response) {
-		return ResponseEntity.ok(userService.signUp(request, response));
+	public ResponseEntity<String> signUp(@Valid @RequestBody SignUpRequest request, HttpServletResponse response, HttpServletRequest httpRequest) {
+		return ResponseEntity.ok(userService.signUp(request, response, httpRequest));
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<String> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
-		return ResponseEntity.ok(userService.login(request.getEmail(), request.getPassword(), response));
+	public ResponseEntity<String> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response, HttpServletRequest httpRequest) {
+		return ResponseEntity.ok(userService.login(request.getEmail(), request.getPassword(), response, httpRequest));
 	}
 
 	@GetMapping("/check-email")

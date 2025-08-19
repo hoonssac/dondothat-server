@@ -43,7 +43,8 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
                 oAuth2User.getName(), 
                 oAuth2User.getNickname(), 
                 oAuth2User.getUserId(), 
-                response
+                response,
+                request
             );
             
             // 리다이렉트 URL 결정 및 이동
