@@ -121,8 +121,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		configuration.setAllowedOrigins(Arrays.asList(
 			"http://localhost:5173",
 			"https://dondothat.netlify.app",
-			"http://dondothat.duckdns.org:8080",
-			"https://54.208.50.238"  // 이 줄 추가
+			"https://54.208.50.238",
+			"https://dondothat.store",
+			"https://www.dondothat.store"
 		));
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(Arrays.asList("*"));
