@@ -79,11 +79,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 		http.exceptionHandling()
 			.authenticationEntryPoint((request, response, authException) -> {
-				if (request.getRequestURI().startsWith("/api/")) {
+				String requestURI = request.getRequestURI();
+				System.out.println("Authentication failed for: " + requestURI);
+				
+				if (requestURI.startsWith("/api/")) {
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 					response.setContentType("application/json");
 					response.setCharacterEncoding("UTF-8");
-					response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"인증이 필요합니다.\"}");
+					
+					// /api/user/me 요청에 대해서는 명확한 에러 메시지 반환
+					if (requestURI.equals("/api/user/me")) {
+						response.getWriter().write("{\"error\":\"AUTHENTICATION_REQUIRED\",\"message\":\"JWT 토큰이 필요합니다. 로그인해주세요.\",\"code\":\"NO_TOKEN\"}");
+					} else {
+						response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"인증이 필요합니다.\"}");
+					}
 				} else {
 					response.sendRedirect("/login");
 				}
