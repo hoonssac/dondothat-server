@@ -26,6 +26,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.ForwardedHeaderFilter;
+import javax.servlet.http.HttpServletResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -75,6 +76,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers("/debug/**").permitAll()
 			// 나머지는 인증 필요 (닉네임 변경, /me 등)
 			.anyRequest().authenticated();
+
+		http.exceptionHandling()
+			.authenticationEntryPoint((request, response, authException) -> {
+				if (request.getRequestURI().startsWith("/api/")) {
+					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+					response.setContentType("application/json");
+					response.setCharacterEncoding("UTF-8");
+					response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"인증이 필요합니다.\"}");
+				} else {
+					response.sendRedirect("/login");
+				}
+			});
 
 		http.addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
