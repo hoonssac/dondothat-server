@@ -81,15 +81,23 @@ public class JWTFilter extends OncePerRequestFilter {
 	}
 	
 	/**
-	 * 쿠키에서 JWT 토큰 추출
+	 * 쿠키에서 JWT 토큰 추출 (fallback 쿠키 포함)
 	 */
 	private String getTokenFromCookie(HttpServletRequest request) {
 		if (request.getCookies() != null) {
+			String token = null;
+			String fallbackToken = null;
+			
 			for (Cookie cookie : request.getCookies()) {
 				if ("accessToken".equals(cookie.getName())) {
-					return cookie.getValue();
+					token = cookie.getValue();
+				} else if ("accessToken_fallback".equals(cookie.getName())) {
+					fallbackToken = cookie.getValue();
 				}
 			}
+			
+			// 기본 토큰이 있으면 사용, 없으면 fallback 토큰 사용
+			return token != null ? token : fallbackToken;
 		}
 		return null;
 	}
