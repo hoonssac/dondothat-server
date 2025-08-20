@@ -1,23 +1,68 @@
 version: "3.8"
 
 services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - dondothat-server
+      - llm-server
+    networks:
+      - backend
+    restart: always
+
+  redis-server:
+    image: redis:7-alpine
+    container_name: redis-server
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+
   dondothat-server:
     build:
       context: ./
       dockerfile: Dockerfile
     container_name: dondothat-server
-    ports:
-      - "8080:8080"
+    # 포트를 내부 네트워크에서만 접근 가능하도록 변경
+    expose:
+      - "8080"
     environment:
       - DB_HOST=mysql-server
       - DB_PORT=3306
       - DB_NAME=dondothat
       - DB_USER=root
       - DB_PASSWORD=dondothat1234
+      - REDIS_HOST=redis-server
+      - SPRING_MAIL_HOST=${SPRING_MAIL_HOST}
+      - SPRING_MAIL_PORT=${SPRING_MAIL_PORT}
+      - SPRING_MAIL_USERNAME=${SPRING_MAIL_USERNAME}
+      - SPRING_MAIL_PASSWORD=${SPRING_MAIL_PASSWORD}
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH=${SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH}
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=${SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
+      - NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
+      - BASE_URL=${BASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - AES_SECRET_KEY=${AES_SECRET_KEY}
+      - CODEF_CLIENT_ID=${CODEF_CLIENT_ID}
+      - CODEF_CLIENT_SECRET=${CODEF_CLIENT_SECRET}
+      - CODEF_PUBLIC_KEY=${CODEF_PUBLIC_KEY}
+      - FSS_API_KEY=${FSS_API_KEY}
     networks:
       - backend
     depends_on:
-      - mysql-server
+      - mysql
+      - redis-server
 
   llm-server:
     build:
@@ -26,8 +71,8 @@ services:
     container_name: llm-server
     env_file:
       - ./llm-server/.env
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     networks:
       - backend
 

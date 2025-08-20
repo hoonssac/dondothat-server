@@ -4,6 +4,161 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="org.bbagisix.expense.mapper.ExpenseMapper">
+    <insert id="insert" parameterType="org.bbagisix.expense.domain.ExpenseVO" useGeneratedKeys="true"
+            keyProperty="expenditureId">
+        INSERT INTO expenditure (user_id, category_id, asset_id, amount, description, expenditure_date, user_modified, codef_transaction_id)
+        VALUES (#{userId}, #{categoryId}, #{assetId}, #{amount}, #{description}, #{expenditureDate}, #{userModified}, #{codefTransactionId})
+    </insert>
+
+    <select id="findById" parameterType="long" resultType="org.bbagisix.expense.domain.ExpenseVO">
+        SELECT expenditure_id,
+               user_id,
+               category_id,
+               asset_id,
+               amount,
+               description,
+               expenditure_date,
+               created_at,
+               updated_at,
+               user_modified,
+               codef_transaction_id,
+               deleted_at
+        FROM expenditure
+        WHERE expenditure_id = #{expenditureId}
+          AND deleted_at IS NULL
+    </select>
+
+    <select id="findAllByUserIdWithDetails" parameterType="long" resultType="org.bbagisix.expense.dto.ExpenseDTO">
+        SELECT e.expenditure_id as expenditureId,
+               e.user_id as userId,
+               e.category_id as categoryId,
+               e.asset_id as assetId,
+               e.amount,
+               e.description,
+               e.expenditure_date as expenditureDate,
+               e.created_at as createdAt,
+               e.updated_at as updatedAt,
+               c.name as categoryName,
+               a.asset_name as assetName,
+               a.bank_name as bankName
+        FROM expenditure e
+        LEFT JOIN category c ON e.category_id = c.category_id
+        LEFT JOIN user_asset a ON e.asset_id = a.asset_id
+        WHERE e.user_id = #{userId} AND a.status = 'main' AND e.deleted_at IS NULL
+        ORDER BY e.expenditure_date DESC
+    </select>
+
+    <update id="update" parameterType="org.bbagisix.expense.domain.ExpenseVO">
+        UPDATE expenditure
+        SET category_id      = #{categoryId},
+            asset_id         = #{assetId},
+            amount           = #{amount},
+            description      = #{description},
+            expenditure_date = #{expenditureDate},
+            user_modified    = TRUE
+        WHERE expenditure_id = #{expenditureId}
+          AND user_id = #{userId}
+          AND deleted_at IS NULL
+    </update>
 
 
+    <select id="getRecentExpenses" parameterType="long" resultType="org.bbagisix.expense.domain.ExpenseVO">
+        SELECT *
+        FROM expenditure
+        WHERE user_id = #{userId}
+          AND expenditure_date >= DATE_SUB(CURDATE(), INTERVAL 2 MONTH)
+          AND deleted_at IS NULL
+        ORDER BY expenditure_date DESC
+    </select>
+
+    <select id="getTodayExpenseCategories" parameterType="long" resultType="long">
+        SELECT category_id
+        FROM expenditure
+        WHERE user_id = #{userId}
+          AND DATE (expenditure_date)=CURDATE()
+          AND deleted_at IS NULL
+    </select>
+
+    <select id="getSumOfPeriodExpenses" resultType="long">
+        SELECT SUM(amount)
+        FROM expenditure
+        WHERE user_id = #{userId}
+          AND category_id = #{categoryId}
+          AND expenditure_date
+            BETWEEN DATE_SUB(CURDATE() - INTERVAL 1 DAY, INTERVAL #{period} DAY)
+            AND (CURDATE() - INTERVAL 1 DAY)
+          AND deleted_at IS NULL
+    </select>
+
+    <insert id="insertExpenses" parameterType="java.util.List">
+        INSERT INTO expenditure (
+            user_id,
+            asset_id,
+            category_id,
+            amount,
+            description,
+            expenditure_date,
+            created_at,
+            user_modified,
+            codef_transaction_id
+        ) VALUES
+        <foreach collection="list" item="expense" separator=",">
+            (
+                #{expense.userId},
+                #{expense.assetId},
+                #{expense.categoryId},
+                #{expense.amount},
+                #{expense.description},
+                #{expense.expenditureDate},
+                NOW(),
+                COALESCE(#{expense.userModified}, FALSE),
+                #{expense.codefTransactionId}
+            )
+        </foreach>
+    </insert>
+
+    <select id="countByCodefTransactionId" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM expenditure
+        WHERE codef_transaction_id = #{codefTransactionId}
+          AND deleted_at IS NULL
+    </select>
+
+    <select id="findByCodefTransactionId" parameterType="string" resultType="org.bbagisix.expense.domain.ExpenseVO">
+        SELECT expenditure_id,
+               user_id,
+               category_id,
+               asset_id,
+               amount,
+               description,
+               expenditure_date,
+               created_at,
+               updated_at,
+               user_modified,
+               codef_transaction_id,
+               deleted_at
+        FROM expenditure
+        WHERE codef_transaction_id = #{codefTransactionId}
+          AND deleted_at IS NULL
+    </select>
+
+    <update id="softDelete">
+        UPDATE expenditure
+        SET deleted_at = NOW(),
+            user_modified = TRUE
+        WHERE expenditure_id = #{param1}
+          AND user_id = #{param2}
+          AND deleted_at IS NULL
+    </update>
+
+    <select id="getCurrentMonthSummaryByCategory" parameterType="long" resultType="map">
+        SELECT c.name as `key`, SUM(e.amount) as `value`
+        FROM expenditure e 
+        JOIN category c ON e.category_id = c.category_id
+        WHERE e.user_id = #{userId} 
+          AND YEAR(e.expenditure_date) = YEAR(NOW())
+          AND MONTH(e.expenditure_date) = MONTH(NOW())
+          AND e.deleted_at IS NULL
+        GROUP BY c.name
+    </select>
 </mapper>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.bbagisix.finproduct.mapper.FinProductMapper">
+
+    <insert id="insertOrUpdateBase" parameterType="org.bbagisix.finproduct.domain.SavingBaseVO">
+        INSERT INTO saving_base (
+            dcls_month, fin_co_no, fin_prdt_cd, kor_co_nm, fin_prdt_nm, 
+            join_way, mtrt_int, spcl_cnd, join_deny, join_member, 
+            etc_note, max_limit, dcls_strt_day, dcls_end_day, fin_co_subm_day
+        )
+        VALUES (
+            #{dclsMonth}, #{finCoNo}, #{finPrdtCd}, #{korCoNm}, #{finPrdtNm}, 
+            #{joinWay}, #{mtrtInt}, #{spclCnd}, #{joinDeny}, #{joinMember}, 
+            #{etcNote}, #{maxLimit}, #{dclsStrtDay}, #{dclsEndDay}, #{finCoSubmDay}
+        )
+        ON DUPLICATE KEY UPDATE
+            kor_co_nm = VALUES(kor_co_nm),
+            fin_prdt_nm = VALUES(fin_prdt_nm),
+            join_way = VALUES(join_way),
+            mtrt_int = VALUES(mtrt_int),
+            spcl_cnd = VALUES(spcl_cnd),
+            join_deny = VALUES(join_deny),
+            join_member = VALUES(join_member),
+            etc_note = VALUES(etc_note),
+            max_limit = VALUES(max_limit),
+            dcls_strt_day = VALUES(dcls_strt_day),
+            dcls_end_day = VALUES(dcls_end_day),
+            fin_co_subm_day = VALUES(fin_co_subm_day);
+    </insert>
+
+    <insert id="insertOrUpdateOption" parameterType="org.bbagisix.finproduct.domain.SavingOptionVO">
+        INSERT INTO saving_option (
+            saving_base_id, dcls_month, fin_co_no, fin_prdt_cd, intr_rate_type, 
+            intr_rate_type_nm, rsrv_type, rsrv_type_nm, save_trm, intr_rate, intr_rate2
+        )
+        VALUES (
+            #{savingBaseId}, #{dclsMonth}, #{finCoNo}, #{finPrdtCd}, #{intrRateType}, 
+            #{intrRateTypeNm}, #{rsrvType}, #{rsrvTypeNm}, #{saveTrm}, #{intrRate}, #{intrRate2}
+        )
+        ON DUPLICATE KEY UPDATE
+            intr_rate_type = VALUES(intr_rate_type),
+            intr_rate_type_nm = VALUES(intr_rate_type_nm),
+            intr_rate = VALUES(intr_rate),
+            intr_rate2 = VALUES(intr_rate2);
+    </insert>
+
+    <select id="findSavingBaseId" parameterType="org.bbagisix.finproduct.domain.SavingBaseVO" resultType="long">
+        SELECT saving_base_id
+        FROM saving_base
+        WHERE fin_co_no = #{finCoNo}
+          AND fin_prdt_cd = #{finPrdtCd}
+          AND dcls_month = #{dclsMonth};
+    </select>
+
+    <!-- 추천 적금 상품 조회 (1차 백엔드 필터링) -->
+    <!-- finPrdtCd별로 중복 제거하여 intrRate 최소값, intrRate2 최대값 추출 -->
+    <select id="findRecommendedSavings" resultType="org.bbagisix.finproduct.dto.RecommendedSavingDTO">
+        SELECT 
+            filtered.fin_prdt_cd as finPrdtCd,
+            filtered.kor_co_nm as korCoNm,
+            filtered.fin_prdt_nm as finPrdtNm,
+            filtered.spcl_cnd as spclCnd,
+            filtered.join_member as joinMember,
+            filtered.min_intr_rate as intrRate,
+            filtered.max_intr_rate2 as intrRate2,
+            filtered.userAge as userAge,
+            filtered.userJob as userJob,
+            filtered.mainBankName as mainBankName
+        FROM (
+            SELECT 
+                b.fin_prdt_cd,
+                b.kor_co_nm,
+                b.fin_prdt_nm,
+                b.spcl_cnd,
+                b.join_member,
+                MIN(o.intr_rate) as min_intr_rate,
+                MAX(o.intr_rate2) as max_intr_rate2,
+                u.age as userAge,
+                u.job as userJob,
+                SUBSTRING_INDEX(a.bank_name, '은행', 1) as mainBankName
+            FROM saving_base b
+            INNER JOIN saving_option o ON b.saving_base_id = o.saving_base_id
+            INNER JOIN user u ON u.user_id = #{userId}
+            LEFT JOIN user_asset a ON a.user_id = #{userId} AND a.status = 'main'
+            WHERE 1=1
+            
+            <!-- 1차 필터링: 명백한 불가능 케이스 제외 -->
+            
+            <!-- 나이 제한 필터 - CDATA로 XML 특수문자 처리 -->
+            AND (
+                b.join_member NOT LIKE '%세%'  -- 나이 제한 없는 상품
+                OR 
+                <![CDATA[
+                -- "만 XX세 이상" 패턴
+                (b.join_member LIKE '%만%세%이상%' AND 
+                 u.age >= CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(b.join_member, '만', -1), '세', 1) AS UNSIGNED))
+                OR
+                -- "만 XX세 이하" 패턴  
+                (b.join_member LIKE '%만%세%이하%' AND
+                 u.age <= CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(b.join_member, '만', -1), '세', 1) AS UNSIGNED))
+                OR
+                -- "만 XX세부터 만 YY세까지" 범위 패턴
+                (b.join_member REGEXP '만[[:space:]]*[0-9]+세.*만[[:space:]]*[0-9]+세' AND
+                 u.age >= CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(b.join_member, '만', 2), '세', 1) AS UNSIGNED) AND
+                 u.age <= CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(b.join_member, '만', -1), '세', 1), '까지', 1) AS UNSIGNED))
+                ]]>
+            )
+            
+            <!-- 직업 제한 필터 -->
+            AND (
+                (u.job = '직장인' AND b.spcl_cnd NOT LIKE '%군인%' AND b.spcl_cnd NOT LIKE '%경찰%' AND b.join_member NOT LIKE '%학생%')
+                OR (u.job = '학생' AND b.join_member NOT LIKE '%직장인%' AND b.join_member NOT LIKE '%재직자%')
+                OR (u.job NOT IN ('직장인', '학생'))
+            )
+            
+            <!-- finPrdtCd별로 그룹화하여 중복 제거 -->
+            GROUP BY b.fin_prdt_cd, b.kor_co_nm, b.fin_prdt_nm, b.spcl_cnd, b.join_member, u.age, u.job, a.bank_name
+        ) filtered
+        
+        <if test="limit != null and limit > 0">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+</mapper>

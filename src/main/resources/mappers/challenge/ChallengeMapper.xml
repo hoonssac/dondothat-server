@@ -1,9 +1,163 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="org.bbagisix.challenge.mapper.ChallengeMapper">
 
+    <!-- 1. 챌린지 ID로 단일 챌린지 조회 -->
+    <select id="findByChallengeId" resultType="org.bbagisix.challenge.domain.ChallengeVO">
+        SELECT challenge_id,
+               category_id,
+               title,
+               summary,
+               description
+        FROM challenge
+        WHERE challenge_id = #{challengeId}
+    </select>
 
+    <!-- 2. 유저가 해당 챌린지에 참여 중인지 확인 -->
+    <select id="existsUserChallenge" resultType="boolean">
+        SELECT EXISTS (SELECT 1
+                       FROM user_challenge
+                       WHERE challenge_id = #{challengeId}
+                         AND user_id = #{userId})
+    </select>
+
+    <!-- 3. 유저가 어떤 챌린지든 참여 중인지 확인 -->
+    <select id="hasActiveChallenge" resultType="boolean">
+        SELECT EXISTS (SELECT 1
+                       FROM user_challenge
+                       WHERE user_id = #{userId}
+                         AND status = 'ongoing')
+    </select>
+
+    <!-- 4. 사용자 존재 여부 확인 -->
+    <select id="existsUser" resultType="boolean">
+        SELECT EXISTS (SELECT 1
+                       FROM user
+                       WHERE user_id = #{userId})
+    </select>
+
+    <!-- 5. 챌린지 참여 -->
+    <insert id="joinChallenge" parameterType="org.bbagisix.challenge.domain.UserChallengeVO">
+        INSERT INTO user_challenge (user_id,
+                                    challenge_id,
+                                    status,
+                                    period,
+                                    progress,
+                                    start_date,
+                                    end_date,
+                                    saving)
+        VALUES (#{userId},
+                #{challengeId},
+                'ongoing',
+                #{period},
+                0,
+                NOW(),
+                DATE_ADD(NOW(), INTERVAL #{period} DAY),
+                #{saving})
+    </insert>
+
+    <!-- 7. 추천 카테고리에 해당하는 챌린지들 조회 -->
+    <select id="findChallengesByCategoryIds" resultType="org.bbagisix.challenge.domain.ChallengeVO">
+        SELECT
+        c.challenge_id,
+        c.category_id,
+        c.title,
+        c.summary,
+        c.description
+        FROM challenge c
+        WHERE c.category_id IN
+        <foreach collection="categoryIds" item="categoryId" open="(" separator="," close=")">
+            #{categoryId}
+        </foreach>
+        AND NOT EXISTS (
+        SELECT 1
+        FROM user_challenge uc
+        WHERE uc.challenge_id = c.challenge_id
+        AND uc.user_id = #{userId}
+        AND uc.status = 'ongoing'
+        )
+        ORDER BY c.challenge_id
+        LIMIT 3
+    </select>
+
+    <!-- 8. 사용자 챌린지 진척도 조회 -->
+    <select id="getChallengeProgress" resultType="org.bbagisix.challenge.dto.ChallengeProgressDTO">
+        SELECT uc.user_challenge_id,
+               uc.challenge_id,
+               (SELECT c.title FROM challenge c WHERE c.challenge_id = uc.challenge_id) as title,
+               uc.status,
+               uc.period,
+               uc.progress,
+               uc.saving
+        FROM user_challenge uc
+        WHERE uc.user_id = #{userId}
+        ORDER BY uc.start_date DESC
+        LIMIT 1
+    </select>
+
+    <!--    진행중인 유저챌린지 조회-->
+    <select id="getOngoingChallenges" resultType="org.bbagisix.challenge.domain.UserChallengeVO">
+        select *
+        from user_challenge
+        where status = 'ongoing'
+    </select>
+
+    <!--    챌린지 아이디로 카테고리 아이디 가져오기-->
+    <select id="getCategoryByChallengeId" parameterType="long" resultType="long">
+        select category_id
+        from challenge
+        where challenge_id = #{challengeId}
+    </select>
+
+    <!--    챌린지 성공/실패여부 업데이트-->
+    <update id="updateChallenge" parameterType="org.bbagisix.challenge.domain.UserChallengeVO">
+        update user_challenge
+        set status=#{status},
+            progress=#{progress},
+            end_date=#{endDate}
+        where user_challenge_id = #{userChallengeId}
+    </update>
+
+    <select id="getUserChallengeById" parameterType="long" resultType="org.bbagisix.challenge.domain.UserChallengeVO">
+        select *
+        from user_challenge
+        where user_challenge_id = #{userChallengeId}
+    </select>
+
+    <!--  완료된 챌린지들 조회 (completed + failed) -->
+    <select id="getUserCompletedChallenges" resultType="org.bbagisix.challenge.domain.UserChallengeVO">
+        SELECT
+            user_challenge_id,
+            user_id,
+            challenge_id,
+            status,
+            period,
+            progress,
+            start_date,
+            end_date,
+            saving,
+            is_active
+        FROM user_challenge
+        WHERE user_id = #{userId}
+          AND status IN ('completed', 'failed')
+        ORDER BY end_date DESC, start_date DESC
+    </select>
+
+    <!-- 챌린지 실패시 소비내역 조회 -->
+    <select id="getFailExpenditures" resultType="org.bbagisix.challenge.dto.ChallengeFailDTO">
+        SELECT
+            e.amount,
+            e.description,
+            e.expenditure_date as expenditureDate
+        FROM expenditure e
+        JOIN challenge c ON c.challenge_id = #{challengeId}
+        WHERE e.user_id = #{userId}
+          AND e.category_id = c.category_id
+          AND e.expenditure_date >= DATE_SUB(NOW(), INTERVAL 1 DAY)
+        ORDER BY e.expenditure_date DESC
+        LIMIT 10
+    </select>
 </mapper>
