@@ -101,8 +101,8 @@ public class RecommendationService {
 					.finPrdtNm(product.getFinPrdtNm())
 					.spclCnd(product.getSpclCnd())
 					.joinMember(product.getJoinMember())
-					.intrRate(product.getIntrRate().doubleValue())
-					.intrRate2(product.getIntrRate2().doubleValue())
+					.intrRate(product.getIntrRate() != null ? product.getIntrRate().doubleValue() : 0.0)
+					.intrRate2(product.getIntrRate2() != null ? product.getIntrRate2().doubleValue() : 0.0)
 					.build())
 				.collect(Collectors.toList());
 
