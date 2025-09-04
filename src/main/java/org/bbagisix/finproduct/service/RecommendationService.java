@@ -8,7 +8,9 @@ import org.bbagisix.finproduct.dto.LlmSavingResponseDTO;
 import org.bbagisix.finproduct.dto.RecommendedSavingDTO;
 import org.bbagisix.finproduct.mapper.FinProductMapper;
 import org.bbagisix.user.dto.CustomOAuth2User;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -24,6 +26,7 @@ import lombok.extern.log4j.Log4j2;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 
 // 적금상품 추천 서비스
 // 하이브리드 방식: 백엔드 1차 필터링 + LLM 2차 지능형 추천
@@ -33,6 +36,8 @@ import java.util.stream.Collectors;
 public class RecommendationService {
 
 	private final FinProductMapper finProductMapper;
+	@Qualifier("cacheRedisTemplate")
+	private final RedisTemplate<String, List<RecommendedSavingDTO>> cacheRedisTemplate;
 	private final RestTemplate restTemplate = new RestTemplate();
 
 	@Value("${LLM_SERVER_URL}")
