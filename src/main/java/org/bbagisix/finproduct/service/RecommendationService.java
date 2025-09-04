@@ -188,4 +188,9 @@ public class RecommendationService {
 				.collect(Collectors.toList());
 		}
 	}
+
+	private String generateCacheKey(int age, String job, String mainBank) {
+		String bank = (mainBank != null && !mainBank.isEmpty()) ? mainBank : "none";
+		return String.format("finproduct:recommendation:%d:%s:%s", age, job, bank);
+	}
 }
