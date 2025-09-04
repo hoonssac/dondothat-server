@@ -52,14 +52,18 @@ public class RecommendationService {
 	// 1차: DB 필터링 → 2차: LLM 지능형 추천
 	public List<RecommendedSavingDTO> getFilteredSavings(Long userId, Integer limit) {
 		try {
-			log.info("사용자 {}에 대한 하이브리드 추천 시작 - limit: {}", userId, limit);
+			long totalStartTime = System.currentTimeMillis();
+		log.info("[성능측정] 사용자 {}에 대한 하이브리드 추천 시작 - limit: {}", userId, limit);
 
 			if (userId == null) {
 				throw new BusinessException(ErrorCode.USER_ID_REQUIRED, "사용자 ID가 필요합니다");
 			}
 
 			// 1차: DB에서 나이 및 직업 필터링 후 조회
+			long dbStartTime = System.currentTimeMillis();
 			List<RecommendedSavingDTO> filteredProducts = finProductMapper.findRecommendedSavings(userId, null);
+			long dbEndTime = System.currentTimeMillis();
+			log.info("[성능측정] DB 쿼리 실행시간: {}ms - 조회된 상품수: {}", (dbEndTime - dbStartTime), filteredProducts != null ? filteredProducts.size() : 0);
 
 			if (filteredProducts == null || filteredProducts.isEmpty()) {
 				log.warn("사용자 {}에 대한 추천 가능한 상품이 없습니다", userId);
@@ -69,9 +73,13 @@ public class RecommendationService {
 			log.info("사용자 {}에 대한 1차 DB 필터링 완료 - {}개 상품", userId, filteredProducts.size());
 
 			// 2차: LLM 서버에서 지능형 추천 (3개)
+			long llmStartTime = System.currentTimeMillis();
 			List<RecommendedSavingDTO> llmRecommendations = callLlmRecommendation(filteredProducts, userId);
+			long llmEndTime = System.currentTimeMillis();
+			log.info("[성능측정] LLM 호출 실행시간: {}ms", (llmEndTime - llmStartTime));
 
-			log.info("사용자 {}에 대한 LLM 추천 완료 - {}개 상품", userId, llmRecommendations.size());
+			long totalEndTime = System.currentTimeMillis();
+			log.info("[성능측정] 전체 추천 처리시간: {}ms - 최종 {}개 상품 반환", (totalEndTime - totalStartTime), llmRecommendations.size());
 
 			return llmRecommendations;
 
