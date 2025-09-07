@@ -1,6 +1,9 @@
 package org.bbagisix.common.config;
 
+import java.util.List;
+
 import org.bbagisix.chat.service.ChatMessageSubscriber;
+import org.bbagisix.finproduct.dto.RecommendedSavingDTO;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -44,6 +47,24 @@ public class RedisConfig {
 		template.setKeySerializer(new StringRedisSerializer());
 		template.setValueSerializer(serializer);
 		template.setHashKeySerializer(serializer);
+
+		return template;
+	}
+
+	@Bean(name = "cacheRedisTemplate")
+	public RedisTemplate<String, List<RecommendedSavingDTO>> cacheRedisTemplate() {
+		RedisTemplate<String, List<RecommendedSavingDTO>> template = new RedisTemplate<>();
+		template.setConnectionFactory(redisConnectionFactory);
+
+		// JSON 직렬화 설정
+		Jackson2JsonRedisSerializer<List> serializer = new Jackson2JsonRedisSerializer<>(List.class);
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JavaTimeModule());
+		objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		serializer.setObjectMapper(objectMapper);
+
+		template.setKeySerializer(new StringRedisSerializer());
+		template.setValueSerializer(serializer);
 
 		return template;
 	}

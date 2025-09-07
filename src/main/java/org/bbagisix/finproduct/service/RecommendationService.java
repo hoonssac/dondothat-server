@@ -8,7 +8,9 @@ import org.bbagisix.finproduct.dto.LlmSavingResponseDTO;
 import org.bbagisix.finproduct.dto.RecommendedSavingDTO;
 import org.bbagisix.finproduct.mapper.FinProductMapper;
 import org.bbagisix.user.dto.CustomOAuth2User;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -24,6 +26,7 @@ import lombok.extern.log4j.Log4j2;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 
 // 적금상품 추천 서비스
 // 하이브리드 방식: 백엔드 1차 필터링 + LLM 2차 지능형 추천
@@ -33,6 +36,8 @@ import java.util.stream.Collectors;
 public class RecommendationService {
 
 	private final FinProductMapper finProductMapper;
+	@Qualifier("cacheRedisTemplate")
+	private final RedisTemplate<String, List<RecommendedSavingDTO>> cacheRedisTemplate;
 	private final RestTemplate restTemplate = new RestTemplate();
 
 	@Value("${LLM_SERVER_URL}")
@@ -52,26 +57,64 @@ public class RecommendationService {
 	// 1차: DB 필터링 → 2차: LLM 지능형 추천
 	public List<RecommendedSavingDTO> getFilteredSavings(Long userId, Integer limit) {
 		try {
-			log.info("사용자 {}에 대한 하이브리드 추천 시작 - limit: {}", userId, limit);
+			long totalStartTime = System.currentTimeMillis();
+			log.info("[성능측정] 사용자 {}에 대한 하이브리드 추천 시작 - limit: {}", userId, limit);
 
 			if (userId == null) {
 				throw new BusinessException(ErrorCode.USER_ID_REQUIRED, "사용자 ID가 필요합니다");
 			}
 
-			// 1차: DB에서 나이 및 직업 필터링 후 조회
+			// 사용자 프로필 정보 조회 (캐시 키 생성용)
+			List<RecommendedSavingDTO> userProfile = finProductMapper.findRecommendedSavings(userId, 1);
+			if (userProfile == null || userProfile.isEmpty()) {
+				throw new BusinessException(ErrorCode.FINPRODUCT_NOT_FOUND, "사용자 정보를 찾을 수 없습니다.");
+			}
+
+			RecommendedSavingDTO firstProduct = userProfile.get(0);
+			int userAge = firstProduct.getUserAge();
+			String userJob = firstProduct.getUserJob();
+			String mainBankName = firstProduct.getMainBankName();
+
+			// 캐시 키 생성
+			String cacheKey = generateCacheKey(userAge, userJob, mainBankName);
+			log.info("[캐시] 캐시 키 생성: {}", cacheKey);
+
+			// 캐시 조회
+			long cacheStartTime = System.currentTimeMillis();
+			List<RecommendedSavingDTO> cachedResult = cacheRedisTemplate.opsForValue().get(cacheKey);
+			long cacheEndTime = System.currentTimeMillis();
+
+			if (cachedResult != null) {
+				log.info("[캐시 HIT] 캐시에서 조회 완료 - {}ms, {}개 상품", (cacheEndTime - cacheStartTime), cachedResult.size());
+				return cachedResult;
+			}
+
+			log.info("[캐시 MISS] 캐시에 데이터 없음 - LLM 호출 진행");
+
+			// 캐시 미스 -> 기존 로직 실행
+			// DB에서 나이 및 직업 필터링 후 조회
+			long dbStartTime = System.currentTimeMillis();
 			List<RecommendedSavingDTO> filteredProducts = finProductMapper.findRecommendedSavings(userId, null);
+			long dbEndTime = System.currentTimeMillis();
+			log.info("[성능측정] DB 쿼리 실행시간: {}ms - 조회된 상품수: {}", (dbEndTime - dbStartTime), filteredProducts != null ? filteredProducts.size() : 0);
 
 			if (filteredProducts == null || filteredProducts.isEmpty()) {
 				log.warn("사용자 {}에 대한 추천 가능한 상품이 없습니다", userId);
 				throw new BusinessException(ErrorCode.FINPRODUCT_NOT_FOUND, "추천 가능한 금융상품이 없습니다");
 			}
 
-			log.info("사용자 {}에 대한 1차 DB 필터링 완료 - {}개 상품", userId, filteredProducts.size());
-
-			// 2차: LLM 서버에서 지능형 추천 (3개)
+			// LLM 서버에서 지능형 추천 (3개)
+			long llmStartTime = System.currentTimeMillis();
 			List<RecommendedSavingDTO> llmRecommendations = callLlmRecommendation(filteredProducts, userId);
+			long llmEndTime = System.currentTimeMillis();
+			log.info("[성능측정] LLM 호출 실행시간: {}ms", (llmEndTime - llmStartTime));
 
-			log.info("사용자 {}에 대한 LLM 추천 완료 - {}개 상품", userId, llmRecommendations.size());
+			// 캐시에 저장 (TTL 7일)
+			cacheRedisTemplate.opsForValue().set(cacheKey, llmRecommendations, 7, TimeUnit.DAYS);
+			log.info("[캐시] 결과 저장 완료 - 키: {}, TTL: 7일", cacheKey);
+
+			long totalEndTime = System.currentTimeMillis();
+			log.info("[성능측정] 전체 추천 처리시간: {}ms - 최종 {}개 상품 반환", (totalEndTime - totalStartTime), llmRecommendations.size());
 
 			return llmRecommendations;
 
@@ -174,5 +217,10 @@ public class RecommendationService {
 					.build())
 				.collect(Collectors.toList());
 		}
+	}
+
+	private String generateCacheKey(int age, String job, String mainBank) {
+		String bank = (mainBank != null && !mainBank.isEmpty()) ? mainBank : "none";
+		return String.format("finproduct:recommendation:%d:%s:%s", age, job, bank);
 	}
 }
